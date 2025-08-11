@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="pt-8 pb-16 px-4 mx-auto max-w-4xl">
+    <div className="pb-16 px-4 mx-auto max-w-4xl">
       <section className="flex flex-row items-center justify-center gap-2 sm:gap-4 md:gap-8 mb-8 sm:mb-12">
         <div className="shrink-0 rounded-full ring-1 ring-foreground/10 p-1 bg-background">
           <Image
@@ -36,7 +36,7 @@ export default function Home() {
             <div className="pl-2 sm:pl-4 mt-2">
             I study computer science 2 years at university Claude Bernard Lyon 1.
             <br />
-            Now I'm studying at Polytechnique Lyon, I'm in my first year of engineering class.
+            Now I&apos;m studying at Polytechnique Lyon, I&apos;m in my first year of engineering class.
             <br />
             </div>
             <br />
@@ -44,7 +44,7 @@ export default function Home() {
             <span style={{ color: "#7aa2f7" }}>def</span> <span style={{ color: "#bb9af7" }}>interests</span><span style={{ color: "#c0caf5" }}>(</span><span style={{ color: "#9ece6a" }}>self</span><span style={{ color: "#c0caf5" }}>)</span><span style={{ color: "#c0caf5" }}>:</span> 
             <div className="pl-2 sm:pl-4 mt-2">
               I like building <a href="https://en.wikipedia.org/wiki/Neural_network_(machine_learning)" target="_blank" className="text-foreground/80">
-              <span className="underline">neural networks</span></a>, i'm interested in the field of AI and machine learning.
+              <span className="underline">neural networks</span></a>, i&apos;m interested in the field of AI and machine learning.
             </div>
             <div className="flex justify-center pt-6 sm:pt-8">
               <Image
@@ -66,8 +66,8 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <span>Project 1: <a href="https://github.com/nathbns/equaTrix" target="_blank" className="text-foreground/80 underline"> EquaTrix</a></span>
                   <div className="flex items-center gap-2">
-                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++ logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/qt/qt-original.svg" alt="Qt logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Image src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++ logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Image src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/qt/qt-original.svg" alt="Qt logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </div>
                 <p className="text-sm sm:text-base">
@@ -79,8 +79,8 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <span>Project 2: <a href="https://github.com/nathbns/doodleJump_like" target="_blank" className="text-foreground/80 underline"> DoodleJump like</a></span>
                   <div className="flex items-center gap-2">
-                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++ logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sdl/sdl-original.svg" alt="sdl logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Image src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++ logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Image src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sdl/sdl-original.svg" alt="sdl logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 </div>
                 <p className="text-sm sm:text-base">
@@ -93,19 +93,19 @@ export default function Home() {
             <span style={{ color: "#7aa2f7" }}>def</span> <span style={{ color: "#bb9af7" }}>learning_deep_learning</span><span style={{ color: "#c0caf5" }}>(</span><span style={{ color: "#9ece6a" }}>self</span><span style={{ color: "#c0caf5" }}>)</span><span style={{ color: "#c0caf5" }}>:</span> 
             <div className="pl-2 sm:pl-4 mt-2 space-y-2">
               <p className="text-sm sm:text-base">
-                I'm learning deep learning with <a href="https://karpathy.ai/" target="_blank" className="text-foreground/80 underline">
+                I&apos;m learning deep learning with <a href="https://karpathy.ai/" target="_blank" className="text-foreground/80 underline">
                 <span className="underline">karpathy</span></a>.
               </p>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <span className="text-sm sm:text-base">learning <a href="https://www.python.org/" target="_blank" className="text-foreground/80 underline">python</a> / <a href="https://pytorch.org/" target="_blank" className="text-foreground/80 underline">pytorch</a></span>
                 <div className="flex items-center gap-2">
-                  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="python logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="pytorch logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Image src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" alt="python logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Image src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="pytorch logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <a href="https://huggingface.co/" target="_blank" className="text-foreground/80 underline text-sm sm:text-base">huggingface</a> 
-                <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="huggingface logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />  
+                <Image src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="huggingface logo" width={20} height={20} className="w-4 h-4 sm:w-5 sm:h-5" />  
               </div>
             </div>
           </p>

@@ -25,7 +25,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <BGPattern variant="grid" mask="fade-edges" className="opacity-40" />
-        <main className="flex-1 pt-14 sm:pt-16">
+        <main className="flex-1 pt-4 sm:pt-8">
           {children}
         </main>
         <Footer />

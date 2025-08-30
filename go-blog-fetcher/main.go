@@ -84,7 +84,7 @@ func (gf *GitHubFetcher) FindMarkdownFiles() ([]BlogPost, error) {
 			return nil
 		}
 
-		// Traiter uniquement les fichiers .md
+		// md
 		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".md") {
 			post, err := gf.parseMarkdownFile(path)
 			if err != nil {

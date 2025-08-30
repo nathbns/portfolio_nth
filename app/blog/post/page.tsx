@@ -19,12 +19,8 @@ interface PageProps {
 
 async function fetchBlogPost(path: string): Promise<BlogPost | null> {
   try {
-    // URL de l'API - utilise Railway en production, localhost en développement
-    const apiUrl = process.env.NODE_ENV === 'production' 
-      ? process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-blog-production.up.railway.app'
-      : 'http://localhost:8080';
-      
-    const response = await fetch(`${apiUrl}/api/blog-posts/${encodeURIComponent(path)}`, {
+    // Lire le fichier JSON statique et trouver l'article correspondant
+    const response = await fetch('/data/blog-posts.json', {
       cache: 'no-cache',
       next: { revalidate: 3600 }
     });
@@ -33,7 +29,10 @@ async function fetchBlogPost(path: string): Promise<BlogPost | null> {
       return null;
     }
     
-    return await response.json();
+    const posts: BlogPost[] = await response.json();
+    const post = posts.find(p => p.path === path);
+    
+    return post || null;
   } catch (error) {
     console.error('Erreur lors du chargement de l\'article:', error);
     return null;

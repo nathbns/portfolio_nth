@@ -1,5 +1,7 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import fs from 'fs';
+import path from 'path';
 
 interface BlogPost {
   title: string;
@@ -11,18 +13,16 @@ interface BlogPost {
 
 async function fetchBlogPosts(): Promise<BlogPost[]> {
   try {
-    // Lire le fichier JSON statique généré par le script Go
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
-    const response = await fetch(`${baseUrl}/data/blog-posts.json`, {
-      cache: 'no-cache',
-      next: { revalidate: 3600 } // Revalider toutes les heures
-    });
+    // Lire le fichier JSON statique directement depuis le système de fichiers
+    const filePath = path.join(process.cwd(), 'public', 'data', 'blog-posts.json');
     
-    if (!response.ok) {
-      throw new Error('Échec du chargement des articles');
+    if (!fs.existsSync(filePath)) {
+      console.warn('Fichier blog-posts.json non trouvé. Exécutez ./scripts/update-blog.sh');
+      return [];
     }
     
-    return await response.json();
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
   } catch (error) {
     console.error('Erreur lors du chargement des articles:', error);
     return [];

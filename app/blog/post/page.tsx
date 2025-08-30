@@ -4,6 +4,8 @@ import { Suspense } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import fs from 'fs';
+import path from 'path';
 
 interface BlogPost {
   title: string;
@@ -17,21 +19,19 @@ interface PageProps {
   searchParams: Promise<{ path?: string }>;
 }
 
-async function fetchBlogPost(path: string): Promise<BlogPost | null> {
+async function fetchBlogPost(pathParam: string): Promise<BlogPost | null> {
   try {
-    // Lire le fichier JSON statique et trouver l'article correspondant
-    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
-    const response = await fetch(`${baseUrl}/data/blog-posts.json`, {
-      cache: 'no-cache',
-      next: { revalidate: 3600 }
-    });
+    // Lire le fichier JSON statique directement depuis le système de fichiers
+    const filePath = path.join(process.cwd(), 'public', 'data', 'blog-posts.json');
     
-    if (!response.ok) {
+    if (!fs.existsSync(filePath)) {
+      console.warn('Fichier blog-posts.json non trouvé. Exécutez ./scripts/update-blog.sh');
       return null;
     }
     
-    const posts: BlogPost[] = await response.json();
-    const post = posts.find(p => p.path === path);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const posts: BlogPost[] = JSON.parse(fileContent);
+    const post = posts.find(p => p.path === pathParam);
     
     return post || null;
   } catch (error) {

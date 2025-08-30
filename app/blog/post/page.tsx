@@ -19,7 +19,12 @@ interface PageProps {
 
 async function fetchBlogPost(path: string): Promise<BlogPost | null> {
   try {
-    const response = await fetch(`http://localhost:8080/api/blog-posts/${encodeURIComponent(path)}`, {
+    // URL de l'API - utilise Railway en production, localhost en développement
+    const apiUrl = process.env.NODE_ENV === 'production' 
+      ? process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-blog-production.up.railway.app'
+      : 'http://localhost:8080';
+      
+    const response = await fetch(`${apiUrl}/api/blog-posts/${encodeURIComponent(path)}`, {
       cache: 'no-cache',
       next: { revalidate: 3600 }
     });

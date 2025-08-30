@@ -43,3 +43,63 @@ body {
     min-width: 44px;
   }
 }
+
+/* Styles pour highlight.js - thème sombre personnalisé */
+.hljs {
+  background: #1a1b26 !important;
+  color: #a9b1d6 !important;
+  border-radius: 8px;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link {
+  color: #bb9af7 !important;
+}
+
+.hljs-function .hljs-keyword {
+  color: #7aa2f7 !important;
+}
+
+.hljs-subst {
+  color: #a9b1d6 !important;
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition,
+.hljs-variable,
+.hljs-template-tag,
+.hljs-template-variable {
+  color: #9ece6a !important;
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+  color: #565f89 !important;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-title,
+.hljs-section,
+.hljs-doctag,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}

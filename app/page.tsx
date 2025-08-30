@@ -3,6 +3,12 @@ import Image from "next/image";
 export default function Home() {
   return (
     <div className="pb-16 px-4 mx-auto max-w-4xl">
+
+    <div className="flex justify-end">
+      <a href="/blog" className="text-foreground/80 hover:text-foreground transition-colors duration-200 text-sm sm:text-base underline decoration-1 underline-offset-4 hover:decoration-2">
+        Blog - Today I Learned
+      </a>
+    </div>
       <section className="flex flex-row items-center justify-center gap-2 sm:gap-4 md:gap-8 mb-8 sm:mb-12">
         <div className="shrink-0 rounded-full ring-1 ring-foreground/10 p-1 bg-background">
           <Image

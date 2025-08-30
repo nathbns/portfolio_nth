@@ -79,7 +79,7 @@ async function BlogContent() {
       <div className="text-center py-12">
         <p className="text-foreground/60">Aucun article disponible pour le moment.</p>
         <p className="text-sm text-foreground/40 mt-2">
-          Assurez-vous que le service Go est en cours d'exécution.
+          Assurez-vous que le service Go est en cours d&apos;exécution.
         </p>
       </div>
     );

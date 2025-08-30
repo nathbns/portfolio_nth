@@ -20,7 +20,8 @@ interface PageProps {
 async function fetchBlogPost(path: string): Promise<BlogPost | null> {
   try {
     // Lire le fichier JSON statique et trouver l'article correspondant
-    const response = await fetch('/data/blog-posts.json', {
+    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
+    const response = await fetch(`${baseUrl}/data/blog-posts.json`, {
       cache: 'no-cache',
       next: { revalidate: 3600 }
     });

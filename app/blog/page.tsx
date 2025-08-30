@@ -12,7 +12,8 @@ interface BlogPost {
 async function fetchBlogPosts(): Promise<BlogPost[]> {
   try {
     // Lire le fichier JSON statique généré par le script Go
-    const response = await fetch('/data/blog-posts.json', {
+    const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '';
+    const response = await fetch(`${baseUrl}/data/blog-posts.json`, {
       cache: 'no-cache',
       next: { revalidate: 3600 } // Revalider toutes les heures
     });

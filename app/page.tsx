@@ -38,7 +38,7 @@ export default function Home() {
           <p className="text-sm sm:text-base md:text-lg leading-relaxed">
             Currently studying at{" "}
             <a
-              href="https://polytech.univ-lyon1.fr/formation/cycle-ingenieur/informatique/informatique-par-cursus-classique"
+              href="https://polytech.univ-lyon1.fr/english-version/programs/computer-science/standard"
               target="_blank"
               className="text-foreground/80"
             >

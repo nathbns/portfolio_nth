@@ -38,11 +38,11 @@ export default function Home() {
           <p className="text-sm sm:text-base md:text-lg leading-relaxed">
             Currently studying at{" "}
             <a
-              href="https://polytech.univ-lyon1.fr/english-version/programs/computer-science/standard"
+              href="http://licence-info.univ-lyon1.fr/"
               target="_blank"
               className="text-foreground/80"
             >
-              <span className="underline">Polytechnique Lyon.</span>
+              <span className="underline">University Claude Bernard Lyon 1.</span>
             </a>
             <br />
             <br />
@@ -53,11 +53,10 @@ export default function Home() {
             <span style={{ color: "#c0caf5" }}>)</span>
             <span style={{ color: "#c0caf5" }}>{" {"}</span>
             <div className="pl-2 sm:pl-4 mt-2">
-              I study computer science 2 years at university Claude Bernard Lyon
+              I study computer science at university Claude Bernard Lyon
               1.
               <br />
-              Now I&apos;m studying at Polytechnique Lyon, I&apos;m in my first
-              year of engineering class.
+              I'm in my third year of bachelor degree in cs.
               <br />
             </div>
             <span style={{ color: "#c0caf5" }}>{" }"}</span>

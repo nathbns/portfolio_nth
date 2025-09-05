@@ -196,7 +196,7 @@ export default function Home() {
                       className="w-4 h-4 sm:w-5 sm:h-5"
                     />
                     <Image
-                      src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
+                      src="huggingface-color.svg"
                       alt="huggingface logo"
                       width={20}
                       height={20}
@@ -313,7 +313,7 @@ export default function Home() {
                   huggingface
                 </a>
                 <Image
-                  src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
+                  src="huggingface-color.svg"
                   alt="huggingface logo"
                   width={20}
                   height={20}

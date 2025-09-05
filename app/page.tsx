@@ -56,7 +56,7 @@ export default function Home() {
               I study computer science at university Claude Bernard Lyon
               1.
               <br />
-              I'm in my third year of bachelor degree in cs.
+              I&apos;m in my third year of bachelor degree in cs.
               <br />
             </div>
             <span style={{ color: "#c0caf5" }}>{" }"}</span>

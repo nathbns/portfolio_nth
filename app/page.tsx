@@ -122,6 +122,9 @@ export default function Home() {
                       height={20}
                       className="w-4 h-4 sm:w-5 sm:h-5"
                     />
+                    <div className="text-xs sm:text-sm text-white italic">
+                      <strong className="text-yellow-200">20★</strong>
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm sm:text-base">

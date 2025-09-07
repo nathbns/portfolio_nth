@@ -159,12 +159,15 @@
 
 @layer theme {
   :root, :host {
+    --color-yellow-200: #fff085;
     --color-blue-300: #90c5ff;
     --color-blue-400: #54a2ff;
     --color-blue-600: #155dfc;
     --color-blue-800: #193cb8;
     --color-gray-100: #f3f4f6;
     --color-gray-900: #101828;
+    --color-stone-50: #fafaf9;
+    --color-white: #fff;
     --spacing: .25rem;
     --container-4xl: 56rem;
     --text-xs: .75rem;
@@ -197,23 +200,27 @@
 
   @supports (color: color(display-p3 0 0 0)) {
     :root, :host {
+      --color-yellow-200: color(display-p3 .988789 .943116 .579188);
       --color-blue-300: color(display-p3 .602559 .767214 .993938);
       --color-blue-400: color(display-p3 .397443 .62813 .992116);
       --color-blue-600: color(display-p3 .174493 .358974 .950247);
       --color-blue-800: color(display-p3 .134023 .230646 .695537);
       --color-gray-100: color(display-p3 .953567 .956796 .964321);
       --color-gray-900: color(display-p3 .070423 .0928982 .151928);
+      --color-stone-50: color(display-p3 .980533 .980533 .977827);
     }
   }
 
   @supports (color: lab(0% 0 0)) {
     :root, :host {
+      --color-yellow-200: lab(94.3433% -5.00429 52.9663);
       --color-blue-300: lab(77.5052% -6.4629 -36.42);
       --color-blue-400: lab(65.0361% -1.42065 -56.9802);
       --color-blue-600: lab(44.0605% 29.0279 -86.0352);
       --color-blue-800: lab(30.2514% 27.7853 -70.2699);
       --color-gray-100: lab(96.1596% -.0823438 -1.13575);
       --color-gray-900: lab(8.11897% .811279 -12.254);
+      --color-stone-50: lab(98.2686% -.0991821 .364304);
     }
   }
 }
@@ -1070,6 +1077,16 @@
     color: var(--foreground);
   }
 
+  .text-foreground\/10 {
+    color: var(--foreground);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .text-foreground\/10 {
+      color: color-mix(in oklab, var(--foreground) 10%, transparent);
+    }
+  }
+
   .text-foreground\/40 {
     color: var(--foreground);
   }
@@ -1126,6 +1143,44 @@
 
   .text-muted-foreground {
     color: var(--muted-foreground);
+  }
+
+  .text-stone-50\/40 {
+    color: rgba(250, 250, 249, .4);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .text-stone-50\/40 {
+      color: color-mix(in oklab, var(--color-stone-50) 40%, transparent);
+    }
+  }
+
+  .text-white {
+    color: var(--color-white);
+  }
+
+  .text-white\/30 {
+    color: rgba(255, 255, 255, .3);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .text-white\/30 {
+      color: color-mix(in oklab, var(--color-white) 30%, transparent);
+    }
+  }
+
+  .text-white\/50 {
+    color: rgba(255, 255, 255, .5);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .text-white\/50 {
+      color: color-mix(in oklab, var(--color-white) 50%, transparent);
+    }
+  }
+
+  .text-yellow-200 {
+    color: var(--color-yellow-200);
   }
 
   .italic {
@@ -1340,6 +1395,13 @@
     .sm\:text-base {
       font-size: var(--text-base);
       line-height: var(--tw-leading, var(--text-base--line-height));
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .sm\:text-sm {
+      font-size: var(--text-sm);
+      line-height: var(--tw-leading, var(--text-sm--line-height));
     }
   }
 

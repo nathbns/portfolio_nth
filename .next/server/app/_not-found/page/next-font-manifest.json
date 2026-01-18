@@ -2,8 +2,11 @@
   "pages": {},
   "app": {
     "[project]/app/_not-found/page": [
-      "static/media/b0a57561b6cb5495-s.p.da1ebef7.woff2",
-      "static/media/8ee3a1ba4ed5baee-s.p.be19f591.woff2"
+      "static/media/caa3a2e1cccd8315-s.p.853070df.woff2",
+      "static/media/797e433ab948586e-s.p.dbea232f.woff2",
+      "static/media/ClashDisplay_Regular-s.p.8d84835b.woff2",
+      "static/media/ClashDisplay_Semibold-s.p.f188b517.woff2",
+      "static/media/ClashDisplay_Bold-s.p.9137c724.woff2"
     ]
   },
   "appUsingSizeAdjust": true,

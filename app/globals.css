@@ -1,105 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
-  --muted-foreground: #6b7280;
+    --background: oklch(97% 0.001 106.424);
+    --foreground: #000000;
+}
+
+:root.dark {
+    --background: #111111;
+    --foreground: #eeeeee;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted-foreground: var(--muted-foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ededed;
-    --muted-foreground: #9ca3af;
-  }
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-clash-display-regular);
+    --font-mono: var(--font-geist-mono);
+    --font-clash-regular: var(--font-clash-display-regular);
+    --font-clash-semibold: var(--font-clash-display-semibold);
+    --font-clash-bold: var(--font-clash-display-bold);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Améliorer la lisibilité sur mobile */
-@media (max-width: 640px) {
-  body {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-}
-
-/* Optimiser les interactions tactiles */
-@media (hover: none) and (pointer: coarse) {
-  [role="button"], button, [type="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-
-/* Styles pour highlight.js - thème sombre personnalisé */
-.hljs {
-  background: #1a1b26 !important;
-  color: #a9b1d6 !important;
-  border-radius: 8px;
-}
-
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-section,
-.hljs-link {
-  color: #bb9af7 !important;
-}
-
-.hljs-function .hljs-keyword {
-  color: #7aa2f7 !important;
-}
-
-.hljs-subst {
-  color: #a9b1d6 !important;
-}
-
-.hljs-string,
-.hljs-title,
-.hljs-name,
-.hljs-type,
-.hljs-attribute,
-.hljs-symbol,
-.hljs-bullet,
-.hljs-addition,
-.hljs-variable,
-.hljs-template-tag,
-.hljs-template-variable {
-  color: #9ece6a !important;
-}
-
-.hljs-comment,
-.hljs-quote,
-.hljs-deletion,
-.hljs-meta {
-  color: #565f89 !important;
-}
-
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-title,
-.hljs-section,
-.hljs-doctag,
-.hljs-type,
-.hljs-name,
-.hljs-strong {
-  font-weight: bold;
-}
-
-.hljs-emphasis {
-  font-style: italic;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-clash-display-regular), sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }

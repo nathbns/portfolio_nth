@@ -46,7 +46,7 @@ export default function Hero() {
 
         {/* Contenu principal */}
         <div>
-          <HomeSection title="about">
+          <HomeSection title="about" className="pb-8 sm:pb-0">
             <div className="flex items-center justify-start">
               <div className="pr-4">
                 <Image src="/pfp.jpg" alt="Nathan BEN SOUSSAN" width={64} height={64} className="rounded-full" />
@@ -59,37 +59,35 @@ export default function Hero() {
           <HomeSection title="internship">
             <div className="space-y-4 pb-12">
               <div className="flex items-center gap-2 text-foreground/80">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 text-stone-400 text-sm font-medium">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 text-stone-400 text-xs sm:text-sm font-medium">
                   <span className="w-2 h-2 rounded-full bg-stone-400 animate-pulse" />
                   Looking for an internship
                 </span>
               </div>
-              <p className="text-foreground/70">
+              <p className="text-sm sm:text-base text-foreground/70">
                 I am currently seeking an internship opportunity starting from <strong>May 1st, 2025</strong>.
               </p>
-              <div className="flex flex-wrap gap-4 text-sm text-foreground/60">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-foreground/60">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 shrink-0" />
                   <span>Starting: May 1st, 2025</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-4 h-4 shrink-0" />
                   <span>Duration: 3 to 4 months</span>
                 </div>
               </div>
-              <p className="text-sm text-foreground/50">
+              <p className="text-xs sm:text-sm text-foreground/50">
                 Open to opportunities in software development.
               </p>
             </div>
           </HomeSection>
 
-          <HomeSection title="education">
-            <div className="flex items-center justify-start text-foreground/50">
-            2025 - present · BSc Computer Science — Year 3 (current year)
-            <br />
-            2024 - 2025 · BSc Computer Science — Year 2 (ranked 7 / 160)
-            <br />
-            2023 - 2024 · BSc Computer Science — Year 1 (ranked 3 / 338)
+          <HomeSection title="education" className="pb-8 sm:pb-0">
+            <div className="text-xs sm:text-sm text-foreground/50 space-y-1">
+              <div>2025 - present · BSc Computer Science — Year 3 (current year)</div>
+              <div>2024 - 2025 · BSc Computer Science — Year 2 (ranked 7 / 160)</div>
+              <div>2023 - 2024 · BSc Computer Science — Year 1 (ranked 3 / 338)</div>
             </div>
           </HomeSection>
 
@@ -101,15 +99,15 @@ export default function Hero() {
             </div>
           </HomeSection>
           
-          <HomeSection title="skills">
+          <HomeSection title="skills" className="pb-8 sm:pb-0">
             <div className="sm:px-12 mt-4 sm:mt-6 mb-4 sm:mb-6">
-                <div className="px-4">
+                <div className="px-2 sm:px-4">
                   <TechStackMarquee className="w-full" />
                 </div>
             </div>
           </HomeSection>
 
-          <HomeSection title="github activity">
+          <HomeSection title="github activity" className="pb-8 sm:pb-0">
               <div className="sm:px-12 px-0 mt-4">
                   <div className="mb-4 sm:mb-6">
                     <ContributionsDisplay

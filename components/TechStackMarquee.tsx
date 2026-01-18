@@ -22,8 +22,8 @@ const techStack = [
 
 function TechItem({ tech }: { tech: typeof techStack[0] }) {
   return (
-    <div className="flex flex-col items-center gap-2 px-6 shrink-0">
-      <div className="w-12 h-12 relative">
+    <div className="flex flex-col items-center gap-1.5 sm:gap-2 px-3 sm:px-6 shrink-0">
+      <div className="w-10 h-10 sm:w-12 sm:h-12 relative">
         <Image
           src={tech.icon}
           alt={tech.name}
@@ -33,7 +33,7 @@ function TechItem({ tech }: { tech: typeof techStack[0] }) {
           unoptimized
         />
       </div>
-      <span className="text-xs text-foreground/50 whitespace-nowrap">{tech.name}</span>
+      <span className="text-[10px] sm:text-xs text-foreground/50 whitespace-nowrap">{tech.name}</span>
     </div>
   );
 }
@@ -71,8 +71,8 @@ export default function TechStackMarquee({ className = "" }: TechStackMarqueePro
           </div>
 
           {/* Fade edges */}
-          <div className="absolute left-0 top-0 w-16 h-full bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
-          <div className="absolute right-0 top-0 w-16 h-full bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+          <div className="absolute left-0 top-0 w-8 sm:w-16 h-full bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+          <div className="absolute right-0 top-0 w-8 sm:w-16 h-full bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
         </div>
       </div>
     </>

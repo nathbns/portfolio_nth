@@ -23,25 +23,25 @@ export default function ProjectCard({ title, description, image, github, tags }:
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-medium text-foreground">{title}</h3>
+          <h3 className="font-medium text-sm sm:text-base text-foreground">{title}</h3>
           <Link
             href={github}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-foreground/50 hover:text-foreground transition-colors"
+            className="text-foreground/50 hover:text-foreground transition-colors shrink-0"
           >
             <Github className="w-4 h-4" />
           </Link>
         </div>
-        <p className="text-sm text-foreground/60 mt-2 line-clamp-2">{description}</p>
+        <p className="text-xs sm:text-sm text-foreground/60 mt-2 line-clamp-2">{description}</p>
         {tags && tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-3">
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="text-xs px-2 py-0.5 rounded-full bg-foreground/5 text-foreground/60"
+                className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-foreground/5 text-foreground/60"
               >
                 {tag}
               </span>

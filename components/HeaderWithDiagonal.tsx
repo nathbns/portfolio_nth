@@ -32,8 +32,8 @@ export default function HeaderWithDiagonals() {
 
           {/* Quote - centrée dans le conteneur */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-2sm text-center px-4 italic">" no amount of money ever bought a second of time "</p>
-            <div className="absolute top-1/2 -translate-y-1/2 right-4 pointer-events-auto z-50">
+            <p className="text-[12px] md:text-[14px] sm:text-[14px] text-center px-2 sm:px-4 italic leading-tight">" no amount of money ever bought a second of time "</p>
+            <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:right-4 pointer-events-auto z-50">
               <ThemeToggle />
             </div>
           </div>

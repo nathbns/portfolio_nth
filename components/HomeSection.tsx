@@ -22,11 +22,11 @@ export default function HomeSection({
         <CornerPattern side="left"  bottomOffset="50px"/>
         <CornerPattern side="right" bottomOffset="50px"/>
 
-        <div className="py-12 px-4 sm:px-8">
-          <h2 className="text-xs uppercase tracking-widest text-foreground/40 mb-6">
+        <div className="py-8 sm:py-12 px-4 sm:px-8">
+          <h2 className="text-[10px] sm:text-xs uppercase tracking-widest text-foreground/40 mb-4 sm:mb-6">
             {title}
           </h2>
-          <div className="min-h-[120px]">
+          <div className="min-h-[80px] sm:min-h-[120px]">
             {children}
           </div>
         </div>

@@ -15,43 +15,47 @@ const projects = [
     description: "Faster, cleaner screenshots that you can edit.",
     image: "/projects/clicke_project.png",
     github: "https://github.com/nathbns/clicke",
-    tags: ["macOS", "Swift", "screenshot"]
+    tags: ["macOS", "Swift", "screenshot"],
   },
   {
     title: "equaTrix",
-    description: "A mathematical tool for solving and visualizing linear algebra problems.",
+    description:
+      "A mathematical tool for solving and visualizing linear algebra problems.",
     image: "/projects/equatrix_project.png",
     github: "https://github.com/nathbns/equaTrix",
-    tags: ["Linear Algebra", "C++", "Qt"]
+    tags: ["Linear Algebra", "C++", "Qt"],
   },
   {
     title: "YOCO Project",
     description: "CNN model for getting the fen notation of a real chess game.",
     image: "/projects/yoco_project.png",
     github: "https://github.com/nathbns/lifprojet_am1_nn",
-    tags: ["Deep Learning", "CNN", "YOLO"]
-  }
-]
+    tags: ["Deep Learning", "CNN", "YOLO"],
+  },
+];
 
 export default function Hero() {
   return (
-    <div
-      className="min-h-screen transition-colors duration-300 relative overflow-x-hidden"
-    >
+    <div className="min-h-screen transition-colors duration-300 relative overflow-x-hidden">
       {/* Header avec hachures diagonales dans les coins - PLEINE LARGEUR */}
       <HeaderWithDiagonals />
 
       {/* Conteneur principal - même max-w-4xl que le header */}
       <div className="relative mx-auto max-w-4xl min-h-screen">
-
         {/* Contenu principal */}
         <div>
           <HomeSection title="about" className="pb-8 sm:pb-0">
             <div className="flex items-center justify-start">
               <div className="pr-4">
-                <Image src="/pfp.jpg" alt="Nathan BEN SOUSSAN" width={64} height={64} className="rounded-full" />
+                <Image
+                  src="/pfp.jpg"
+                  alt="Nathan BEN SOUSSAN"
+                  width={64}
+                  height={64}
+                  className="rounded-full"
+                />
               </div>
-              Nathan BEN SOUSSAN, 23  <br />
+              Nathan BEN SOUSSAN, 23 <br />
               computer science student | developer
             </div>
           </HomeSection>
@@ -65,12 +69,13 @@ export default function Hero() {
                 </span>
               </div>
               <p className="text-sm sm:text-base text-foreground/70">
-                I am currently seeking an internship opportunity starting from <strong>May 1st, 2025</strong>.
+                I am currently seeking an internship opportunity starting from{" "}
+                <strong>May 1st, 2026</strong>.
               </p>
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-foreground/60">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 shrink-0" />
-                  <span>Starting: May 1st, 2025</span>
+                  <span>Starting: May 1st, 2026</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 shrink-0" />
@@ -85,9 +90,15 @@ export default function Hero() {
 
           <HomeSection title="education" className="pb-8 sm:pb-0">
             <div className="text-xs sm:text-sm text-foreground/50 space-y-1">
-              <div>2025 - present · BSc Computer Science — Year 3 (current year)</div>
-              <div>2024 - 2025 · BSc Computer Science — Year 2 (ranked 7 / 160)</div>
-              <div>2023 - 2024 · BSc Computer Science — Year 1 (ranked 3 / 338)</div>
+              <div>
+                2025 - present · BSc Computer Science — Year 3 (current year)
+              </div>
+              <div>
+                2024 - 2025 · BSc Computer Science — Year 2 (ranked 7 / 160)
+              </div>
+              <div>
+                2023 - 2024 · BSc Computer Science — Year 1 (ranked 3 / 338)
+              </div>
             </div>
           </HomeSection>
 
@@ -98,25 +109,25 @@ export default function Hero() {
               ))}
             </div>
           </HomeSection>
-          
+
           <HomeSection title="skills" className="pb-8 sm:pb-0">
             <div className="sm:px-12 mt-4 sm:mt-6 mb-4 sm:mb-6">
-                <div className="px-2 sm:px-4">
-                  <TechStackMarquee className="w-full" />
-                </div>
+              <div className="px-2 sm:px-4">
+                <TechStackMarquee className="w-full" />
+              </div>
             </div>
           </HomeSection>
 
           <HomeSection title="github activity" className="pb-8 sm:pb-0">
-              <div className="sm:px-12 px-0 mt-4">
-                  <div className="mb-4 sm:mb-6">
-                    <ContributionsDisplay
-                      username="nathbns"
-                      variant="compact"
-                      className="w-full"
-                    />
-                  </div>
-                </div>
+            <div className="sm:px-12 px-0 mt-4">
+              <div className="mb-4 sm:mb-6">
+                <ContributionsDisplay
+                  username="nathbns"
+                  variant="compact"
+                  className="w-full"
+                />
+              </div>
+            </div>
           </HomeSection>
         </div>
       </div>

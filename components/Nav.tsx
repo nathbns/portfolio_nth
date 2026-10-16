@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -22,8 +23,16 @@ export default function Nav() {
     <nav className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
       <Link
         href="/"
-        className="font-medium tracking-[-0.02em] hover:text-muted"
+        className="flex items-center gap-2.5 font-medium tracking-[-0.02em] hover:text-muted"
       >
+        <Image
+          src="/pfp.jpg"
+          alt=""
+          width={28}
+          height={28}
+          priority
+          className="size-7 rounded-full object-cover"
+        />
         {site.name}
       </Link>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[15px] text-muted">

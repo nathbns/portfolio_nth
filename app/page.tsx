@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import Shell from "@/components/Shell";
 import Section from "@/components/Section";
@@ -14,24 +13,9 @@ export default function Home() {
 
   return (
     <Shell>
-      <header className="flex items-center gap-4">
-        <Image
-          src="/pfp.jpg"
-          alt={site.name}
-          width={64}
-          height={64}
-          priority
-          className="size-16 rounded-full object-cover"
-        />
-        <div>
-          <h1 className="text-2xl font-medium leading-none tracking-[-0.02em]">
-            {site.name}
-          </h1>
-          <p className="mt-2 text-muted">{site.tagline}</p>
-        </div>
-      </header>
+      <h1 className="sr-only">{site.name}</h1>
 
-      <p className="mt-4 text-muted">
+      <p className="text-muted">
         {site.links.map((link, index) => (
           <span key={link.href}>
             {index > 0 && <span aria-hidden> · </span>}

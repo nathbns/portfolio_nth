@@ -1,0 +1,321 @@
+.\" -*- mode: troff; coding: utf-8 -*-
+.TH Synchonisations problématiques "2026" "Dekker 1.0"
+.SH NAME
+synbugs \- Les bugs et problématiques des synchronisations entre threads
+.SH SYNOPSIS
+.LP
+.B synbugs
+.SH COPYRIGHT
+.if n synbugs, Copyright (C) 2026 by Grégory Mounié
+.if t synbugs, Copyright \(co 2026 by Grégory Mounié
+.SH DESCRIPTION
+.B Synbugs
+est un ensemble de programme de synchronisation entre deux
+threads. Ils sont volontairement construit en utilisant l'attente
+active, qui vide votre batterie sur un problème jouet.
+
+Le but est de modifier deux variables "simultanément", dans la fonction
+.B void DoubleInc()
+, du point de vue de la fonction
+.B void Check().
+
+Le but du TP n'est
+.B PAS
+d'écrire un programme correct. Le but est de comprendre
+les raisons des bugs des versions incorrectes.
+
+Les classes de bugs que vous avez à identifier sont décrites dans le fichier info
+.I dekker.info
+
+.PP
+.SH OPTIONS
+Aucune option
+.PP
+.SH PRÉREQUIS 1
+Compilez et exécutez le premier squelette (
+.BI synbugs_skel.c
+). Sur toute machine ayant
+physiquement deux cœurs, il devrait s'interrompre sur une erreur.
+
+.BR "Une machine physique ou virtuelle mono-coeur, ou tout autre environnement simulant le parallélisme (valgrind, etc.), ne sont pas adaptés pour faire ce TP."
+
+.PP
+.SH COMMENT IMPLANTER TOUTES LES ÉTAPES SUIVANTES
+Vous aurez à copier le squelette de départ ajouter des variables globales et changer les deux fonctions
+.BI "void debutSectionCritique([[maybe_unused]] int me)"
+et
+.BI "void finSectionCritique([[maybe_unused]] int me)"
+qui sont utilisées dans les fonctions
+.B void DoubleInc()
+et
+.B void Check()
+
+Pour écrire la boucle d'attente active des versions 1, 2, 3, 4, 5, 5.5, 6, DEKKER, PETERSON, vous utiliserez GOTO (dans un
+but purement pédagogique de meilleure compréhension des
+synchronisations). Les explications sont dans le fichier
+info
+.I dekker.info
+
+.PP									
+.SH VERSION 0: UNE PAIRE DE VARIABLE ATOMIQUE N'EST PAS ATOMIQUE.
+En copiant le squelette de départ, modifiez le type des deux variables a et b
+pour les rendre atomiques:
+.B static atomic_int a=0;
+et
+.B static atomic_int b=0;
+
+Les types atomiques sont définis dans l'entête standard C
+.BI #include <stdatomic.h>
+Compilez et et exécutez le premier squelette. Sur toute machine ayant
+physiquement deux coeurs, il devrait s'interrompre sur une erreur.  Que se passe-t-il ? Quelle
+est la classe du bug ?
+
+.PP									
+.SH VERSION 1: UNE BOUCLE D'ATTENTE ACTIVE + UNE VARIABLE BOOLÉENNE ATOMIQUE N'EST PAS SUFFISANTE
+En copiant le squelette de départ, ajoutez une variable globale booléenne
+.B static bool occupation=false; 
+
+Dans
+.B debutSectionCritique()
+La boucle d'attente active attend que la variable
+.I occupation
+soit à
+.I false
+puis la variable
+.I occupation
+est passée à
+.I true
+
+Dans
+.B finSectionCritique()
+la variable
+.I occupation
+est passée à
+.I false
+
+Compilez et exécutez le premier squelette. Sur toute machine ayant
+physiquement deux coeurs, il devrait s'interrompre sur une erreur.  Que se passe-t-il ? Quelle
+est la classe du bug ?
+
+.PP									
+.SH VERSION 2: UNE VARIABLE BOOLÉENNE ATOMIQUE AVANT LA UNE BOUCLE D'ATTENTE ACTIVE
+
+.B Cette version est volontairement particulièrement idiote ! Vous ne l'auriez jamais codé.
+Néanmoins elle a des propriété différente de la précédente !
+
+Faire la même chose que pour la version 1, mais dans
+.B debutSectionCritique()
+mettre l'affectation de
+.I occupation
+AVANT la boucle.
+
+Compilez et exécutez le premier squelette. Cela ne va pas planter !
+Penser à tuer le processus.  Que se passe-t-il ? Quelle
+est la classe du bug ?
+
+.PP									
+.SH VERSION 3: UNE VARIABLE ENTIÈRE ATOMIQUE
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (me)
+qui vaut soit 0, soit 1.
+
+En copiant le squelette de départ, ajouter une variable globale
+.B static atomic_int tour=0;
+
+Utilisez cette variable pour choisir le thread qui attend dans la boucle
+d'entrée de la section critique (le thread dont ce n'est pas le tour)
+et modifiez le tour en sortant de la section critique.
+
+Compilez et exécutez votre code. Ce code exact devrait fonctionner,
+mais néanmoins le code de gestion des sections critiques est faux !
+
+Pour vous en persuader, commentez le lancement du deuxième
+thread. Compilez et exécutez votre code. Que se passe-t-il ? Quelle
+est la classe du bug ?
+
+.PP									
+.SH VERSION 4: DEUX VARIABLES BOOLÉENNES ATOMIQUES
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (me)
+qui vaut soit 0, soit 1.
+
+
+En copiant le squelette de départ, ajoutez une variable globale
+.B static bool demande_et_occupation[2]={}; // {false, false }; 
+
+En utilisant l'entrée du tableau qui correspond au thread, il prévient
+l'autre thread de sa volonté d'entrer et d'occuper la section
+critique.
+
+Compilez et exécutez votre code. Que se passe-t-il ? Quelle
+est la classe du bug ?
+
+
+.PP									
+.SH VERSION 5: DEUX VARIABLES BOOLÉENNES ATOMIQUES ET RENONCEMENT
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (me)
+qui vaut soit 0, soit 1.
+
+En copiant le squelette de départ, ajoutez une variable globale
+.B static bool demande_et_occupation[2]={}; // { false, false }; 
+
+Une amélioration (subtilement bugguée) possible pour la version 5 consiste à renoncer
+temporairement à son entrée dans la boucle d'attente.  Cela consiste,
+par rapport à la version 4, à avancer le label de la boucle pour le
+placer avant l'affectation, et puis renoncer avant de faire le GOTO.
+
+Compilez et exécutez votre code. Que se passe-t-il ? Quelle
+est la classe du bug ?
+
+.PP									
+.SH VERSION 5.5 (qui marche): DEUX VARIABLES BOOLÉENNES ATOMIQUES ET RENONCEMENT Et ATTENTE ALÉATOIRE
+.B Cette version fonctionne sans bug majeur, mais elle a des inconvénients.
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (int me)
+qui vaut soit 0, soit 1.
+
+En copiant le squelette de départ, ajoutez une variable globale
+.B static bool demande_et_occupation[2]={}; // {false, false}; 
+
+Une correction possible pour la version 5 consiste à attendre un temps
+aléatoire après avoir renoncer.
+
+En utilisant les fonctions
+.B double drand48()
+et
+B. int usleep(useconds_t usec)
+
+Ajouter une petite attente aléatoire.
+
+Compilez et exécutez votre code. Que se passe-t-il ? Mesurez sa
+performance.
+
+Il n'y a pas de bugs, néanmoins il y a quelques
+inconvénients. Lesquels ?
+
+.PP									
+.SH VERSION 6 : DEUX VARIABLES BOOLÉENNES ATOMIQUES ET UN RENONCEMENT SI CE N'EST PAS SON TOUR
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (me)
+qui vaut soit 0, soit 1.
+
+En copiant le squelette de départ, ajoutez deux variables globales
+.B static bool demande_et_occupation[2]=false; 
+et
+.B static atomic_int tour=0;
+
+En repartant de la version 5, le thread qui renonce est le thread dont
+ce n'est pas le tour.  Il faut juste penser à changer aussi le tour en
+sortant de la section critique.
+
+Compilez et exécutez votre code. Que se passe-t-il ?  Quelle
+est la classe du bug ?
+
+.PP									
+.SH VERSION DEKKER (1966) : DEUX VARIABLES BOOLÉENNES ATOMIQUES ET UN RENONCEMENT SI CE N'EST PAS SON TOUR ET TROIS BOUCLES
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (me)
+qui vaut soit 0, soit 1.
+
+En copiant le squelette de départ, ajoutez deux variables globales
+.B static bool demande_et_occupation[2]=false; 
+et
+.B static atomic_int tour=0;
+
+Par rapport à la version 5, la modification consiste à ajouter deux
+petites boucles supplémentaires: lorsqu'un thread renonce, il attend
+que ce soit son tour avant de recommencer le tout; le thread dont
+c'est le tour, attend que l'autre thread renonce.
+
+
+Compilez et exécutez votre code. Il devrait fonctionner. Mesurez sa
+performance.
+
+.PP									
+.SH VERSION PETTERSON (1981) : DEUX VARIABLES BOOLÉENNES ATOMIQUES ET UN DERNIER
+
+B. Cette solution est beaucoup plus simple, avec juste une petite boucle.
+
+Chacun des deux threads reçoit en argument un numéro d'identification
+.I (me)
+qui vaut soit 0, soit 1.
+
+En copiant le squelette de départ, ajoutez deux variables globales
+.B static bool demande_et_occupation[2]=false; 
+et
+.B static atomic_int dernier=0;
+
+Avant de tester dans une boucle s'il peut entrer, le thread affecte la variable dernier.
+
+Si les deux threads veulent entrer, c'est le thread dont le numéro est dans
+.I dernier
+qui attend que l'autre renonce.
+
+Compilez et exécutez votre code. Il devrait fonctionner.  Mesurez sa
+performance.
+
+.PP									
+.SH VERSION MUTEX : COMMENT CODER CORRECTEMENT SANS ATTENTE ACTIVE
+
+
+En copiant le squelette de départ, ajoutez une variable globale
+.B static mtx_t m; 
+et initalisez là dans le main avant la création des threads avec la fonction
+.B nt mtx_init (mtx_t *MUTEX, int TYPE)
+avec un TYPE
+.B mtx_plain
+
+Pour rentrer dans la section critique il faut prendre le verrou avec
+.B int mtx_lock (mtx_t *MUTEX)
+et le libérer à la sortie avec
+.B int mtx_unlock (mtx_t *MUTEX)
+
+Compilez et exécutez votre code. Il devrait fonctionner.  Mesurez sa
+performance.
+
+.PP									
+.SH VERSION RWMUTEX : COMMENT CODER CORRECTEMENT SANS ATTENTE ACTIVE
+
+En copiant le squelette de départ, ajoutez une variable globale
+.B static pthread_rwlock_t; 
+et initalisez là dans le main avant la création des threads avec la fonction
+.B pthread_rwlock_init(pthread_rwlock_t *restrict rwlock, const pthread_rwlockattr_t *restrict attr);
+
+Pour rentrer dans la section critique il faut prendre le verrou avec 
+.B int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
+ (pour les lectures) ou
+.B int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);
+(pour les lectures/écritures)
+et le libérer à la sortie avec
+.B int pthread_rwlock_unlock(pthread_rwlock_t *rwlock);
+
+Ajoutez le lancement d'une dizaine de threads pour exécutez le
+.I Check()
+Compilez et exécutez votre code. Il devrait fonctionner. Mesurez sa
+performance.
+
+.PP									
+.SH VERSION SPINLOCK : COMMENT CODER L'ATTENTE ACTIVE
+
+En copiant le squelette de départ, ajoutez une variable globale
+.B static pthread_spinlock_t; 
+et initalisez là dans le main avant la création des threads avec la fonction
+.B int pthread_spin_init(pthread_spinlock_t *lock, int pshared);
+
+Pour rentrer dans la section critique il faut prendre le verrou avec
+.B int pthread_spin_lock(pthread_spinlock_t *lock);
+et le libérer à la sortie avec
+.B int pthread_spin_unlock(pthread_spinlock_t *lock);
+
+Compilez et exécutez votre code. Il devrait fonctionner. Mesurez sa
+performance.
+
+
+

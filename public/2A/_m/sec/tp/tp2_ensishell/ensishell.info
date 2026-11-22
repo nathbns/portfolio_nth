@@ -1,0 +1,465 @@
+This is ensishell.info, produced by texi2any version 7.3 from
+ensishell.texi.
+
+CC-BY-SA Copyright © Grégory Mounié 2026 Copyright © Yves Denneulin 2000
+INFO-DIR-SECTION System administration
+
+
+File: ensishell.info,  Node: Top,  Next: Compilation test unitaires,  Prev: (dir),  Up: (dir)
+
+Ensishell
+*********
+
+Le but de ce TP est de vous familiariser avec la gestion des processus
+en vous faisant écrire un petit interpréteur de commandes (un _shell_),
+sous ensemble de ceux que vous utilisez tous les jours: ‘bash’, ‘tcsh’,
+‘zsh’, ou même le PowerShell de Windows.
+
+   La démarche du sujet est progressive: le ‘shell’ est enrichi au fur
+et à mesure de nouvelles fonctionnalités, pendant deux séances.
+
+   Ce document discute des points concernant l'implémentation de votre
+shell.  La spécification de votre shell, y compris les appels systèmes à
+utiliser dans les implémentations des différentes parties, sont dans le
+man.
+
+   Différentes variantes sur les fonctionnalités sont possibles (cf.
+section Les variantes::).
+
+* Menu:
+
+* Compilation test unitaires::
+* Lancement et enchaînement de commandes::
+* Le pipe::
+* Redirection dans les fichiers::
+* Appel de l'interpréteur Scheme::
+* Les variantes::
+* Index complet::              Index complet, , Les variantes, Top
+
+
+File: ensishell.info,  Node: Compilation test unitaires,  Next: Lancement et enchaînement de commandes,  Prev: Top,  Up: Top
+
+1 Compilation, test unitaires et rendu
+**************************************
+
+Le squelette fourni inclut un script ‘cmake’ pour construire
+automatiquement les Makefile utiles.
+
+   *Vous devez préalablement également créer et remplir un fichier
+‘AUTHORS’, à la racine du projet, avec vos prénoms, noms et logins*
+Typiquement pour l'équipe Alice Liddell et Bob Morane, cela donne un
+fichier AUTHORS
+
+Alice Liddell liddella
+Bob Morane moraneb
+
+   Puis vous pouvez demander à compiler depuis la racine
+
+$ cd ensishell
+$ cat AUTHORS
+$ cmake -B build
+
+* Menu:
+
+* Compilation::
+* Tests unitaires::
+
+
+File: ensishell.info,  Node: Compilation,  Next: Tests unitaires,  Prev: Compilation test unitaires,  Up: Compilation test unitaires
+
+1.1 Compilation
+===============
+
+La création des Makefile s'effectue en utilisant ‘cmake’ dans un
+répertoire dans lequel seront aussi créés les fichiers générés.  Le
+répertoire "build" du squelette sert à cet usage.  Tout ce qui apparaît
+dans "build" pourra donc être facilement effacé ou ignoré.
+
+   La première compilation s'effectue alors en tapant:
+
+$ cd ensishell
+$ cd build
+$ make
+$ make test
+
+   et les suivantes, dans le répertoire ‘build/’, avec
+
+$ make
+$ make test
+$ make check
+
+
+File: ensishell.info,  Node: Tests unitaires,  Prev: Compilation,  Up: Compilation test unitaires
+
+1.2 Tests unitaires
+===================
+
+Une petite batterie de test en Ruby vous est fournie pour vous aider à
+construire plus rapidement un code correct.  ‘make test’ devrait donc
+trouver la plupart des bugs de votre programme au fur est à mesure que
+vous l'écrivez.  Vous pouvez lancer directement l'exécutable
+‘../tests/allShellTests.rb’ avec ‘make check’ pour avoir plus de
+détails.  Vous pouvez aussi lancer individuellement les tests qui vous
+intéressent (cf.  ‘../tests/allShellTests.rb --help’).
+
+
+File: ensishell.info,  Node: Lancement et enchaînement de commandes,  Next: Le pipe,  Prev: Compilation test unitaires,  Up: Top
+
+2 Lancement et enchaînement de commandes
+****************************************
+
+Pour commencer, vous devez simplement lire des commandes sur l'entrée
+standard et les exécuter.  Pour cela vous devez utiliser les appels
+système ‘fork(...)’ et ‘exec(...)’ (‘man 2 fork’, ‘man 3 execvp’).
+
+   Exemple d'utilisation :
+
+$ /bin/ls /usr
+X11R6  etc    include  kerberos  lib64    local  share  tmp
+bin    games  java     lib       libexec  sbin   src
+$ pwd
+/perms/denneuli
+
+   Pour vous aider, vous disposez d'une fonction de lecture de l'entrée
+standard de la bibliothèque libre _readline_ pour vous permettre
+l'édition des lignes, la complétion avec le _tab_ et la sauvegarde de
+l'historique.
+
+   Vous disposez d'une petite bibliothèque de parsing de commande dans
+le fichier ‘parsecmd.c’.  Le squelette fournit un exemple d'utilisation
+qui se contente d'afficher ce qui a été lu et parsé.
+
+   Les appels systèmes utiles sont ‘fork(...)’, ‘execvp(...)’,
+‘waitpid(...)’.
+
+* Menu:
+
+* Lancement en tâche de fond::
+* Liste des processus::
+
+
+File: ensishell.info,  Node: Lancement en tâche de fond,  Next: Liste des processus,  Prev: Lancement et enchaînement de commandes,  Up: Lancement et enchaînement de commandes
+
+2.1 Lancement en tâche de fond
+==============================
+
+Lancer une commande dont le temps d'exécution est assez long (‘sleep 20’
+par exemple).  Vous constaterez que le prompt apparaît immédiatement,
+sans attendre la fin de l'exécution.  En effet, par défaut, le processus
+père n'attend pas son fils, celui qu'il a créé.  Pour cela il faut
+utiliser la routine ‘wait’ ou ‘waitpid’(1).
+
+   Modifier votre programme pour qu'il attende la fin d'une commande
+lancée avant de passer à la suivante.
+
+   Ajouter ensuite la possibilité de lancer une commande en tâche de
+fond (‘commande &’) si besoin.  Pour cela, le caractère & en entrée
+positionne le champ ‘bg’ dans la
+‘struct cmdline’.
+
+   Le parseur fournit ne reconnaît le caractère & que s'il est seul.  Il
+faut un espace entre le & et l'argument le précédant.
+
+   ---------- Footnotes ----------
+
+   (1) Des détails sur l'appel ‘waitpid’ en tapant ‘man 2 waitpid’
+
+
+File: ensishell.info,  Node: Liste des processus,  Prev: Lancement en tâche de fond,  Up: Lancement et enchaînement de commandes
+
+2.2 Liste des processus en tâches de fond
+=========================================
+
+Ajouter à votre _shell_ une commande interne ‘jobs’ qui donne la liste
+des processus lancés en tâche de fond de votre shell avec leur pid et la
+commande lancée.  Pour savoir si un fils du shell s'est terminé vous
+pouvez utiliser _waitpid_ ‘man waitpid’.
+
+
+File: ensishell.info,  Node: Le pipe,  Next: Redirection dans les fichiers,  Prev: Lancement et enchaînement de commandes,  Up: Top
+
+3 Le pipe
+*********
+
+Ajouter la possibilité de connecter l'entrée d'un processus avec la
+sortie d'un autre comme dans la commande ‘ls / | grep u’.  La question
+ne concerne que le cas avec 2 commandes seulement (1 seul pipe).  Les
+appels systèmes utiles sont ‘pipe(...)’, ‘dup(...)’, ‘dup2(...)’,
+‘close(...)’.
+
+
+File: ensishell.info,  Node: Redirection dans les fichiers,  Next: Appel de l'interpréteur Scheme,  Prev: Le pipe,  Up: Top
+
+4 Redirection dans les fichiers
+*******************************
+
+Ajouter la possibilité de connecter l'entrée ou la sortie d'un processus
+avec des fichiers comme dans la commande ‘cat < toto > tata ’.
+
+   Les redirections et le pipe peuvent être appelés ensemble.  Les
+appels systèmes utiles sont ‘open(...)’, ‘dup(...)’, ‘dup2(...)’,
+‘close(...)’.
+
+* Menu:
+
+* Les fichiers déjà existants::
+
+
+File: ensishell.info,  Node: Les fichiers déjà existants,  Prev: Redirection dans les fichiers,  Up: Redirection dans les fichiers
+
+4.1 Les fichiers déjà existants
+===============================
+
+Les fichiers déjà existant ne sont pas tronqués automatiquement par une
+ouverture en écriture.  Par défaut, les écritures se superposent à ce
+qui est déjà écrit.  Lors de la redirection en sortie vers un fichier
+déjà existant, il faudra, juste après l'avoir ouvert, réduire sa taille
+à 0 pour effacer son contenu précédent avec la fonction ‘ftruncate’.
+
+
+File: ensishell.info,  Node: Appel de l'interpréteur Scheme,  Next: Les variantes,  Prev: Redirection dans les fichiers,  Up: Top
+
+5 Appel de l'interpréteur Scheme
+********************************
+
+Il est très facile d'embarquer un langage de programmation dans votre
+interpréteur (Perl, Python, Ruby, Lua, etc.)  et de l'étendre.  Dans le
+squelette, c'est quelques lignes de code.  Un point dur pour notre shell
+est de différencier une commande shell des instructions du langage.
+
+   Le squelette fourni inclut un interpréteur ‘Scheme’
+(<https://fr.wikipedia.org/wiki/Scheme>), nommé ‘guile’.  Scheme est un
+langage fonctionnel, version épurée du langage LISP (utilisé dans
+emacs).  Toutes les expressions du langage commençant par une parenthèse
+« ‘(’ », le squelette différencie une commande shell d'une expression en
+Sheme en testant la première lettre d'une ligne.
+
+   Les instructions suivantes fonctionnent directement avec le
+squelette.
+
+(display "Hello world !\n")
+(display (* 2 (+ 1 2 3 4 5 6))) (newline)
+
+   L'interpréteur Scheme est étendue par la fonction ‘int
+scheme_implem_executer(char *)’ que vous devez implanter.  Cette
+fonction doit exécuter la commande shell passée dans la chaîne de
+caractère en argument.
+
+   Le code suivant doit créer un répertoire nommé ‘Toto’.
+
+(executer "mkdir Toto")
+
+   Il suffit de refaire exactement ce que vous faites dans les questions
+précédentes.  Si votre code est correctement découpé en fonction, le
+code à ajouter est trivial.  Sinon, vous devriez changer sa structure.
+
+   Les appels systèmes utiles sont ‘fork(...)’, ‘execvp(...)’,
+‘waitpid(...)’, ‘open(...)’ mais ils ne devraient pas être appelés
+directement.  La fonction ‘parsecmd(...)’ sera elle aussi utile.
+
+   Vous devriez pouvoir exécuter le petit programme suivant qui crée des
+répertoires dont les noms sont les nombres de fibonnacci 10, 20 et 30.
+
+(define (fibo n) (if (<= n 2) 1 (+ (fibo (- n 1)) (fibo (- n 2))))) (for-each (lambda (i) (executer (string-append "mkdir " (number->string (fibo i))))) '(10 20 30))
+
+   Dans notre interpréteur simple, le code Scheme doit tenir sur une
+seule ligne.  Mais, il est possible de charger et d'évaluer un fichier
+Scheme contenant votre code.
+
+(load "repertoires_fibo.scm")
+
+
+File: ensishell.info,  Node: Les variantes,  Next: Index complet,  Prev: Appel de l'interpréteur Scheme,  Up: Top
+
+6 Les variantes
+***************
+
+Vous pouvez ajouter des fonctionnalités à votre shell.  Nous avons
+sélectionné un ensemble de variantes compatible qui sont de difficultés
+équivalentes.
+
+   Choisissez vos variantes et pensez bien à insérer son numéro (cf
+section *note 1: Compilation test unitaires.) et sa description dans le
+code.
+
+ID   Variantes
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+0    Jokers et environnement (sec.  *note 61: Les jokers et les variables d'environnements.); Limitation du temps de calcul (sec.
+     *note 66: Limitation du temps de calcul.)
+1    Jokers étendus (tilde, brace) (sec.  *note 62: Jokers étendus.); Pipes multiples (sec.  *note 65: Pipes multiples.)
+2    Terminaison asynchrone (sec.  *note 64: Terminaison asynchrone.); Limitations du temps de calcul (sec.  *note 66: Limitation du temps de calcul.)
+3    Temps de calcul (sec.  *note 63: Temps de calcul d'un processus.); Pipes multiples (sec.  *note 65: Pipes multiples.)
+4    Jokers et environnement (sec.  *note 61: Les jokers et les variables d'environnements.); Pipes multiples (sec.  *note 65: Pipes multiples.)
+5    Jokers étendus (tilde, brace) (sec.  *note 62: Jokers étendus.); Limitation du temps de calcul (sec.  *note 66: Limitation du temps de calcul.)
+6    Terminaison asynchrone (sec.  *note 64: Terminaison asynchrone.); Pipes multiples (sec.  *note 65: Pipes multiples.)
+7    Temps de calcul (sec.  *note 63: Temps de calcul d'un processus.); Limitation du temps de calcul (sec.  *note 66: Limitation du temps de calcul.))
+8    Jokers et environnement (sec.  *note 61: Les jokers et les variables d'environnements.); Terminaison asynchrone (sec.  *note 64: Terminaison asynchrone.);
+9    Jokers étendus (tilde, brace) (sec.  *note 62: Jokers étendus.); Temps de calcul (sec.  *note 63: Temps de calcul d'un processus.);
+10   Jokers et environnement (sec.  *note 61: Les jokers et les variables d'environnements.); Temps de calcul (sec.  *note 63: Temps de calcul d'un processus.);
+11   Jokers étendus (tilde, brace) (sec.  *note 62: Jokers étendus.); Terminaison asynchrone (sec.  *note 64: Terminaison asynchrone.);
+
+Table : Les différentes variantes
+
+* Menu:
+
+* Les jokers et les variables d'environnements::
+* Jokers étendus::
+* Temps de calcul d'un processus::
+* Terminaison asynchrone::
+* Pipes multiples::
+* Limitation du temps de calcul::
+
+
+File: ensishell.info,  Node: Les jokers et les variables d'environnements,  Next: Jokers étendus,  Prev: Les variantes,  Up: Les variantes
+
+6.1 Les jokers et les variables d'environnements
+================================================
+
+Les jokers (l'étoile, les crochets, le tilde, les variables
+d'environnements) sont remplacés dans la ligne de commande par le shell
+avant l'exécution.
+
+   Il est possible d'obtenir ces remplacements avec ‘wordexp’).
+
+   Les jokers et les variables d'environnements comme dans la commande
+‘ls ~/t* \$PWD/toto’.  Les appels systèmes et fonctions utiles sont
+‘wordexp(...)’, ‘wordfree(...)’, ‘strnlen(...)’, ‘strlcpy(...)’,
+‘strlcat(...)’, ‘malloc(...)’, ‘free(...)’.
+
+
+File: ensishell.info,  Node: Jokers étendus,  Next: Temps de calcul d'un processus,  Prev: Les jokers et les variables d'environnements,  Up: Les variantes
+
+6.2 Jokers étendus
+==================
+
+Les jokers sont remplacés dans la ligne de commande par le shell avant
+l'exécution.
+
+   Ajouter la possibilité en utilisant ‘glob’ d'utiliser les jokers
+comme dans la commande ‘ls ~/t{oto,iti} *.c’.  Les appels systèmes et
+fonctions utiles sont ‘glob(...)’, ‘globfree(...)’, ‘strnlen(...)’,
+‘strlcpy(...)’, ‘strlcat(...)’, ‘malloc(...)’, ‘free(...)’.
+
+
+File: ensishell.info,  Node: Temps de calcul d'un processus,  Next: Terminaison asynchrone,  Prev: Jokers étendus,  Up: Les variantes
+
+6.3 Temps de calcul d'un processus
+==================================
+
+Lorsqu'un processus termine, si son père n'est pas en attente de sa
+terminaison, il lui envoie un signal ‘SIGCHLD’.  La réception du signal
+peut déclencher un traitant qui réalise un certain nombre d'actions.
+
+   Le but est d'afficher un message indiquant le temps de calcul d'un
+processus lancé en tache de fond (avec un ‘&’) à sa terminaison.  Le
+shell devra afficher immédiatement le message.  Les appels systèmes et
+fonctions utiles sont ‘waitpid(...)’, ‘sigaction(...)’,
+‘gettimeofday(...)’.
+
+   La réception d'un signal débloque les appels systèmes bloquants comme
+‘waitpid(...)’ ou ‘read(...)’ (cf leurs manuels).  Il faudra les
+reprendre le cas échéant.
+
+
+File: ensishell.info,  Node: Terminaison asynchrone,  Next: Pipes multiples,  Prev: Temps de calcul d'un processus,  Up: Les variantes
+
+6.4 Terminaison asynchrone
+==========================
+
+Le but est d'afficher la terminaison d'un processus s'exécutant en tâche
+de fond au moment où celui-ci se termine, sans attendre le prochain
+prompt de l'interpréteur demandant une commande.
+
+   Il faudra traiter le signal "SIGCHILD" reçu par le père (le shell)
+lorsque le fils termine.  La fonction traitant associée au signal est
+exécutée de manière asynchrone dès que le signal arrive au processus.
+
+   Les appels systèmes utiles sont ‘signal(...)’.
+
+   La réception d'un signal débloque les appels systèmes bloquants comme
+waitpid ou read (cf leurs manuels).  Il faudra les reprendre le cas
+échéant.
+
+
+File: ensishell.info,  Node: Pipes multiples,  Next: Limitation du temps de calcul,  Prev: Terminaison asynchrone,  Up: Les variantes
+
+6.5 Pipes multiples
+===================
+
+Le but est que les séquences de pipes multiples fonctionnent.
+
+  $ ls -R / | egrep "^to" | egrep "\.jpg$" | gzip -c | gzip -cd | less
+
+   Les appels systèmes utiles sont ‘pipe(...)’, ‘dup(...)’, ‘dup2(...)’,
+‘close(...)’.
+
+
+File: ensishell.info,  Node: Limitation du temps de calcul,  Prev: Pipes multiples,  Up: Les variantes
+
+6.6 Limitation du temps de calcul
+=================================
+
+Il est possible de fixer une limite maximum au temps de calcul que les
+processus lancés peuvent utiliser.  À la fin d'un délai souple, le
+processus reçoit un signal SIGXCPU, qui par défaut le termine.  S'il
+intercepte le signal, il le reçoit ensuite chaque seconde jusqu'à la fin
+du délai dur, où il est détruit par un signal SIGKILL.
+
+   Le but est d'implanter la commande interne ‘ulimit X’, où X est le
+nombre de secondes avant la limite souple.  Mettez la limite dure à X+5
+secondes plus tard.  Attention, la limite ne doit s'appliquer qu'aux
+nouveaux processus lancés et pas au shell.
+
+   Les appels systèmes et fonctions utiles sont ‘setrlimit(...)’,
+‘strcmp(...)’, ‘atoi(...)’,.
+
+
+File: ensishell.info,  Node: Index complet,  Prev: Les variantes,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* fork exec execvp:                      Lancement et enchaînement de commandes.
+                                                               (line  6)
+* fork execvp waitpid parsecmd:          Appel de l'interpréteur Scheme.
+                                                               (line 37)
+* open dup dup2 close:                   Le pipe.              (line  6)
+* open dup dup2 close <1>:               Redirection dans les fichiers.
+                                                               (line  6)
+* waitpid:                               Lancement en tâche de fond.
+                                                               (line  6)
+* waitpid <1>:                           Liste des processus.  (line  6)
+
+
+Tag Table:
+Node: Top196
+Node: Compilation test unitaires1308
+Node: Compilation2045
+Node: Tests unitaires2693
+Node: Lancement et enchaînement de commandes3322
+Node: Lancement en tâche de fond4533
+Ref: Lancement en tâche de fond-Footnote-15610
+Node: Liste des processus5687
+Node: Le pipe6175
+Node: Redirection dans les fichiers6645
+Node: Les fichiers déjà existants7192
+Node: Appel de l'interpréteur Scheme7770
+Node: Les variantes10088
+Node: Les jokers et les variables d'environnements12711
+Node: Jokers étendus13459
+Node: Temps de calcul d'un processus14051
+Node: Terminaison asynchrone14964
+Node: Pipes multiples15782
+Node: Limitation du temps de calcul16201
+Node: Index complet17093
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+Info-documentlanguage: fr
+End:

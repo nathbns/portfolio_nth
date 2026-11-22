@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
     BUILD_SHA: commit(),
     BUILD_DATE: new Date().toISOString().slice(0, 10),
   },
+  // public/2A holds large static files (videos): never bundle them into functions.
+  outputFileTracingExcludes: {
+    "*": ["public/2A/**"],
+  },
   images: {
     remotePatterns: [
       {

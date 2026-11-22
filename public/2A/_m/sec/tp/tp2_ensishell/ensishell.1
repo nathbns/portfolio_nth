@@ -1,0 +1,111 @@
+.\" -*- mode: troff; coding: utf-8 -*-
+.TH ENSISHELL 1 "2026" "Ensishell 3.0"
+.SH NAME
+ensishell \- Un shell orienté fonctionnel
+.SH SYNOPSIS
+.LP
+.B ensishell
+[file]
+.SH COPYRIGHT
+.if n Ensishell, Copyright (C) 2026 by Grégory Mounié
+.if t Ensishell, Copyright \(co 2026 by Grégory Mounié
+.SH DESCRIPTION
+.B Ensishell
+est un interpréteur de commande qui exécute des commandes lues depuis
+son entrée standard, ou depuis un fichier.  C'est un shell UNIX qui
+utilise Scheme (un dialecte de LISP) comme langage de programmation.
+\" .B Ensishell
+\" .
+\" also incorporates useful features from the \fIKorn\fP and \fIC\fP
+\" shells (\fBksh\fP and \fBcsh\fP).
+.PP
+.SH OPTIONS
+.IP "\(bu" 3
+\f(CR--clone\fR
+.IP
+Le shell utilise
+.BR clone3 (2)
+au lieu de
+.BR fork (2)
+pour créer de nouveaux processus.
+.PP
+
+.PP
+.SH PREMIÈRE SEMAINE: COMPRENDRE LE FONCTIONNEMENT DU SHELL
+
+Un shell est une boucle
+.BR while
+: lire une ligne; décoder la ligne;
+créer un processus qui va exécuter ce que demande la ligne;
+
+Dans le code fourni du squelette départ, cette boucle se trouve dans
+la fonction
+.BR main()
+et utilise les fonctions:
+.BR readline
+pour lire une ligne;
+.BR add_history
+pour mémoriser la ligne dans l'historique de la bibliothèque
+.BR readline(3)
+;
+.BR parsecmd
+pour décoder la ligne; et elle se tramine par une boucle
+.BR for
+qui affiche le contenu de la structure contenant le découpage en mots
+de la ligne.
+
+C'est cette boucle \f(CRfor\fR qu'il faut éditer en début de sujet.
+
+.SH PREMIÈRE SEMAINE: DÉMARRER UNE COMMANDE
+Lorsque l'utilisateur entre une commande au prompt, \f(CRensishell
+démarre\fR un nouveau processus (voir
+.BR fork (2),
+.BR clone3 (2))
+qui exécute le programme de la
+commande. Puis il attend sa terminaison (voir
+.BR waitpid (2))
+sauf si la commande termine
+par \f(CR'&'\fR. Ensuite, il demande une nouvelle commande avec son
+prompt.
+
+Une commande est une suite de mots séparés par des blancs. Le premier
+mot est le programme à exécuter (voir
+.BR execvp(2))
+
+.SH PREMIÈRE SEMAINE À IMPLANTER: PASSER DES COMMANDES À UN INTERPRÉTEUR LISP 
+Lorsque l'utilisateur entre une commande au prompt qui commence par un
+"(", la ligne est considéré comme un code en LISP. La ligne doit être passé
+à l'interprétreur.
+
+L'interpréteur doit être étendu par une fonction qui prend en argument
+une chaine de caractères qui est une commande à exécuter.
+
+.SH HUITIÈME SEMAINE: COMMANDES INTERNES
+.LP
+\f(CRensishell\fR implémente plusieurs commandes internes:
+.IP "\(bu" 3
+\f(CRcd\fR \fI
+.IP
+La commande change le répertoire courant du shell (voir
+.BR chdir (2))
+.IP "\(bu" 3
+\f(CRjobs\fR \fI
+.IP
+La commande affiche la liste des processus lancés en tâche de fond et qui ne
+sont pas terminés.
+.SH 
+
+.SH HUITIÈME SEMAINE: ENTRÉES/SORTIES (REDIRECTION DE FICHIERS ET PIPE)
+.LP
+Si l'entrée est une séquence de commandes séparées par des
+\f(CR|\fR (voir
+.BR pipe (2)),
+chaque commande est lancée simultanément et la sortie d'une commande
+est interconnectée à l'entrée de la suivante.
+
+.LP
+Si une séquence de commande contient les séquences \f(CR<
+\fIfile\fR ou \f(CR> \fIfile\fR\fR alors l'entrée standard de la
+première commande (ou respectivement la sortie standard de la dernière
+commande) deviennent le fichier \fIfile\fR.
+

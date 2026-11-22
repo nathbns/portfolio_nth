@@ -1,0 +1,357 @@
+@import "tailwindcss";
+@source not "../../public/2A";
+
+/* Palette reprise du style d'opencode.ai : gris neutres, un bleu pour les liens,
+   thème clair ou sombre selon le système (ou le choix fait dans l'en-tête). */
+:root {
+  --grey-1: light-dark(#fbfbfb, #0c0c0c);
+  --grey-2: light-dark(#ffffff, #161616);
+  --grey-3: light-dark(#f5f5f5, #1a1a1a);
+  --grey-4: light-dark(#eeeeee, #242424);
+  --grey-5: light-dark(#e0e0e0, #2e2e2e);
+  --grey-6: light-dark(#d2d2d2, #4b4b4b);
+  --grey-7: light-dark(#888888, #6a6a6a);
+  --grey-8: light-dark(#6b6b6b, #8f8f8f);
+  --grey-9: light-dark(#5c5c5c, #aeaeae);
+  --grey-10: light-dark(#3a3a3a, #dbdbdb);
+  --grey-11: light-dark(#161616, #fafafa);
+  --link: light-dark(#3b5cf6, #6b8fff);
+  --ok: light-dark(#1a7f37, #3fb950);
+  --warn: light-dark(#9a6700, #d29922);
+  /* Couleurs des schémas des fiches */
+  --c-blue: light-dark(#3b5cf6, #6b8fff);
+  --c-green: light-dark(#1a7f37, #3fb950);
+  --c-orange: light-dark(#c2410c, #fb923c);
+  --c-purple: light-dark(#7c3aed, #c084fc);
+  --c-red: light-dark(#dc2626, #f87171);
+  --c-cyan: light-dark(#0e7490, #22d3ee);
+  --c-yellow: light-dark(#a16207, #facc15);
+  --tint: light-dark(color-mix(in srgb, #3b5cf6 7%, transparent), color-mix(in srgb, #6b8fff 13%, transparent));
+}
+
+@theme inline {
+  --color-bg: var(--grey-1);
+  --color-raised: var(--grey-2);
+  --color-weak: var(--grey-3);
+  --color-weaker: var(--grey-4);
+  --color-line: var(--grey-5);
+  --color-line-strong: var(--grey-6);
+  --color-fg: var(--grey-9);
+  --color-fg-strong: var(--grey-11);
+  --color-fg-weak: var(--grey-8);
+  --color-fg-weaker: var(--grey-7);
+  --color-link: var(--link);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-tint: var(--tint);
+  --color-c-blue: var(--c-blue);
+  --color-c-green: var(--c-green);
+  --color-c-orange: var(--c-orange);
+  --color-c-purple: var(--c-purple);
+  --color-c-red: var(--c-red);
+  --color-c-cyan: var(--c-cyan);
+  --color-c-yellow: var(--c-yellow);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+.rev {
+  background: var(--grey-1);
+  color: var(--grey-9);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.rev ::selection {
+  background: color-mix(in srgb, var(--link) 30%, transparent);
+}
+
+}
+
+@layer components {
+/* Petite étiquette en capitales, comme les « eyebrows » d'opencode */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--grey-8);
+  line-height: 1;
+}
+
+/* Ligne de liste avec barre d'accent à gauche au survol */
+.row {
+  position: relative;
+  transition: background-color 0.15s;
+}
+.row::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 2px;
+  background: var(--link);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.row:hover {
+  background: var(--tint);
+}
+.row:hover::before {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Documents Markdown (README, réponses, corrigés)
+   --------------------------------------------------------------------------- */
+.doc {
+  color: var(--grey-10);
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+.doc > * + * {
+  margin-top: 1em;
+}
+.doc h1,
+.doc h2,
+.doc h3,
+.doc h4 {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--grey-11);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  scroll-margin-top: 7.5rem;
+}
+.doc h1 {
+  font-size: 1.75rem;
+  margin-top: 2.5rem;
+}
+.doc h2 {
+  font-size: 1.4rem;
+  margin-top: 2.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--grey-5);
+}
+.doc h3 {
+  font-size: 1.15rem;
+  margin-top: 2rem;
+}
+.doc h4 {
+  font-size: 1rem;
+  margin-top: 1.5rem;
+}
+.doc > :first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+.doc a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
+  text-underline-offset: 0.2em;
+}
+.doc a:hover {
+  text-decoration-color: var(--link);
+}
+.doc strong {
+  color: var(--grey-11);
+  font-weight: 600;
+}
+.doc ul,
+.doc ol {
+  padding-left: 1.4em;
+}
+.doc ul {
+  list-style: square;
+}
+.doc ol {
+  list-style: decimal;
+}
+.doc li + li {
+  margin-top: 0.35em;
+}
+.doc li::marker {
+  color: var(--grey-7);
+}
+.doc blockquote {
+  border-left: 2px solid var(--link);
+  background: var(--tint);
+  padding: 0.75em 1em;
+  color: var(--grey-10);
+}
+.doc blockquote > * + * {
+  margin-top: 0.5em;
+}
+.doc hr {
+  border: 0;
+  border-top: 1px solid var(--grey-5);
+  margin: 2.5em 0;
+}
+.doc code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--grey-4);
+  padding: 0.1em 0.35em;
+}
+.doc pre {
+  background: var(--grey-3);
+  border: 1px solid var(--grey-5);
+  padding: 1em 1.1em;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+.doc pre code {
+  background: none;
+  padding: 0;
+  font-size: 13.5px;
+}
+.doc table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  max-width: 100%;
+}
+.doc th,
+.doc td {
+  border: 1px solid var(--grey-5);
+  padding: 0.45em 0.75em;
+  text-align: left;
+  vertical-align: top;
+}
+.doc th {
+  background: var(--grey-3);
+  color: var(--grey-11);
+  font-weight: 600;
+}
+.doc img {
+  max-width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+   Coloration du code (classes de highlight.js), aux couleurs du site
+   --------------------------------------------------------------------------- */
+.hljs-comment,
+.hljs-quote {
+  color: var(--grey-7);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta .hljs-keyword,
+.hljs-doctag {
+  color: light-dark(#a626a4, #c792ea);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition {
+  color: light-dark(#2f7d32, #a5d6a7);
+}
+.hljs-number,
+.hljs-literal,
+.hljs-symbol {
+  color: light-dark(#b45309, #f6c177);
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: var(--link);
+}
+.hljs-type,
+.hljs-built_in,
+.hljs-class .hljs-title,
+.hljs-title.class_ {
+  color: light-dark(#0e7490, #7dd3fc);
+}
+.hljs-meta,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attr {
+  color: light-dark(#9a3412, #fdba74);
+}
+.hljs-deletion {
+  color: light-dark(#b91c1c, #fca5a5);
+}
+
+/* ---------------------------------------------------------------------------
+   Fiches visuelles
+   --------------------------------------------------------------------------- */
+.fiche {
+  counter-reset: fsec;
+  color: var(--grey-10);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.fiche-section + .fiche-section {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--grey-5);
+}
+.fiche-section > h2::before {
+  counter-increment: fsec;
+  content: counter(fsec, decimal-leading-zero);
+  margin-right: 0.9rem;
+  color: var(--grey-7);
+  font-size: 0.8em;
+}
+.fiche p + p,
+.fiche p + ul,
+.fiche ul + p {
+  margin-top: 0.75em;
+}
+.fiche ul.flist {
+  list-style: square;
+  padding-left: 1.3em;
+}
+.fiche ul.flist li + li {
+  margin-top: 0.4em;
+}
+.fiche ul.flist li::marker {
+  color: var(--grey-7);
+}
+.fiche strong {
+  color: var(--grey-11);
+  font-weight: 600;
+}
+.fiche code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--grey-4);
+  padding: 0.1em 0.35em;
+}
+.fiche pre code {
+  background: none;
+  padding: 0;
+}
+.ftable {
+  border-collapse: collapse;
+  font-size: 14.5px;
+  width: 100%;
+}
+.ftable th,
+.ftable td {
+  border: 1px solid var(--grey-5);
+  padding: 0.45em 0.7em;
+  text-align: left;
+  vertical-align: top;
+}
+.ftable th {
+  background: var(--grey-3);
+  color: var(--grey-11);
+  font-weight: 600;
+}
+.fiche svg text {
+  font-family: var(--font-mono);
+}
+/* Sur téléphone, un tableau trop large défile au lieu d'élargir la page. */
+@media (max-width: 767px) {
+  .ftable {
+    display: block;
+    overflow-x: auto;
+  }
+}
+}

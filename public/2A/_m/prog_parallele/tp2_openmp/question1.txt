@@ -1,0 +1,57 @@
+- 12 cores et 1 Thread per core avec lscpu
+- 12 avec nproc
+
+root@de4ad448b644:/tp# ./mesure.sh ./tri_fusion
+seq      n=16777216 seuil=10000 threads=1 temps=1.244
+seq      n=16777216 seuil=10000 threads=2 temps=1.211
+seq      n=16777216 seuil=10000 threads=4 temps=1.217
+seq      n=16777216 seuil=10000 threads=8 temps=1.191
+seq      n=16777216 seuil=10000 threads=12 temps=1.196
+root@de4ad448b644:/tp#
+
+
+==========================================================================
+Commentaires 
+==========================================================================
+
+Q1.1 : OK.
+- lscpu : 12 CPU, 1 thread par cœur => 12 cœurs physiques, pas
+  d'hyperthreading (SMT). Donc 12 cœurs = 12 threads matériels.
+- nproc : 12 = nombre de CPU utilisables par le processus (ici tous).
+
+À ajouter : c'est un Apple M4 Pro, avec 8 cœurs "performance" et
+4 cœurs "efficacité" (plus lents). Docker tourne dans une machine
+virtuelle Linux qui cache ce détail (lscpu affiche "Model name: -").
+
+Pourquoi c'est important pour la suite :
+- Les 4 derniers cœurs valent moins qu'un cœur performance chacun.
+  Il ne faut donc pas espérer S_12 = 12 : la courbe d'accélération
+  va s'infléchir après 8 threads, même avec un code parfait.
+- À 12 threads, on occupe tous les cœurs. Le moindre processus en
+  fond (macOS, la VM Docker, le navigateur) en vole un, donc les
+  mesures à 12 threads sont les plus bruitées.
+
+Mesure de seq (en fait la Q3.1, faite en avance) : OK, bon réflexe.
+- Le temps reste à ~1,2 s quel que soit le nombre de threads : c'est
+  normal. tri_seq ne contient aucune directive OpenMP, donc
+  OMP_NUM_THREADS ne change rien. Le "threads=12" affiché est
+  omp_get_max_threads(), c'est-à-dire le nombre de threads qu'une
+  région parallel UTILISERAIT, pas le nombre réellement utilisé.
+- Cette mesure sert à deux choses :
+  1. La référence : T_seq = min = 1,191 s (n = 2^24).
+     Toutes les accélérations seront S_p = 1,191 / T_p.
+  2. L'ordre de grandeur du bruit : 1,191 -> 1,244 s, soit ~4 %.
+     Un écart de moins de ~5 % entre deux versions n'est donc pas
+     significatif.
+- À retenir : T_seq est le temps de la version seq, PAS celui de v1
+  lancée avec 1 thread. Diviser par v1 à 1 thread masquerait le coût
+  de création des tâches, et c'est justement ce coût que la partie
+  3.2 étudie.
+- Pour la Q3.5, il faudra aussi T_seq pour n = 10^6 :
+  ./tri_fusion seq 1000000   (3 fois, garder le min)
+
+Astuces :
+- Précise toujours la version : ./mesure.sh ./tri_fusion seq
+  (ici ça a marché parce que seq est la version par défaut).
+- Pour garder une trace : ./mesure.sh ./tri_fusion seq | tee -a resultats.txt
+

@@ -1,0 +1,91 @@
+.\" -*- mode: troff; coding: utf-8 -*-
+.TH Channel "2026" "Channel 1.0"
+.SH NAME
+channel \- Producteurs-consommateurs multi-threads
+.SH SYNOPSIS
+.LP
+.B channel
+.SH COPYRIGHT
+.if n channel, Copyright (C) 2026 by Grégory Mounié
+.if t channel, Copyright \(co 2026 by Grégory Mounié
+.SH DESCRIPTION
+.B Channel
+est un ensemble de programme de synchronisation
+producteurs-consommateurs. Un but secondaire est de comparer les
+performances plusieurs implémentations.
+
+Les détails d'implémentations sont dans le fichier info
+.I channel.info
+
+.PP
+.SH OPTIONS
+Aucune option
+.PP
+.SH PRÉREQUIS 1
+Compilez et exécutez le premier squelette (
+.B mesure_perf_channel_moniteur
+).
+
+.BR "Une machine physique ou virtuelle mono-coeur, ou tout autre environnement simulant le parallélisme (valgrind, etc.), ne sont pas adaptés pour faire ce TP."
+
+.PP
+.SH COMMENT IMPLANTER TOUTES LES ÉTAPES SUIVANTES
+Vous aurez à copier le squelette de départ deux fois et à compléter
+les fonctions gérant les channels (création, destruction, ajout de
+messages, retrait de messages)
+
+
+.PP									
+.SH VERSION MONITEUR EN ISO C
+En copiant les fichiers du squelette de départ, créez un moniteur pour
+implémenter un producteurs-consommateurs.
+
+Ce moniteur utilisera un tampon circulaire de taille fixé à la
+création.
+
+Dans la structure du type channel, les variables d'états seront: les
+deux index (celui pour savoir où lire et où écrire dans le tampon); le
+nombre de messages dans le tampon; le nombre de threads bloqués en
+lecture du tampon; le nombre de threads bloqués en écriture du
+tampon; le tampon.
+
+Lire le fichier channel.info pour savoir comment gérer l'allocation du
+tampon dans la structure.
+
+La structure contient aussi les variables nécessaires à la
+synchronisation (mutex, condition).
+
+.PP									
+.SH VERSION MONITEUR+SÉMAPHORE EN ISO C ET SÉMAPHORE PTHREADS
+Les lectures et les écritures dans le tampon ne manipulent jamais les
+mêmes données. Le but de cette deuxième version est de pouvoir lire
+et écrire simultanément dans le tampon (1 lecture et 1 écriture en
+même temps si le tampon est partiellement plein).
+
+Cette implémentation utilise deux mutex différents pour faire
+chaque lecture et chaque écriture. Elle utilise deux sémaphores pour
+compter le nombre de cases libres ou bien occupées dans le tampon. Ces
+sémaphores réalisent la synchronisation des threads. Il n'y a pas de
+variable de condition dans cette version.
+
+En copiant les fichiers du squelette de départ, modifier les types et les noms de fichiers en
+.BI "channel_sem.h, channel_sem.c"
+et
+.BI "mesure_perf_channel_sem.c"
+et le type (et ses utilisations)
+.BI "channel_sem_t"
+et la terminaison des fonctions deviennent
+.BI "_sem: channel_sem_t *newChannel_sem(int const N), addChannel_sem etc."
+
+Dans la structure du type
+.B "channel_sem_t"
+, les variables d'états seront: les
+deux index (celui pour savoir où lire et où écrire dans le tampon); le tampon.
+La structure contient aussi les variables nécessaires à la
+synchronisation (les deux mutex, les deux sémaphores).
+La structure contient aussi la taille du tampon fixé à la création.
+
+Lire le fichier channel.info pour savoir comment gérer l'allocation du
+tampon dans la structure.
+
+

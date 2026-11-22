@@ -247,18 +247,25 @@ function itemFiles(dir: string) {
 // Matières
 // ---------------------------------------------------------------------------
 
-const ITEM_RE = /^(cm|td|tp)(\d+|_|$)/i;
+const ITEM_RE = /^(cm|td|tp)(\d+|[_-]|$)/i;
 const CONTAINER_RE = /^(cm|td|tp)s?$/i;
 
-function findItemDirs(rel: string, depth: number): string[] {
+/**
+ * Dossiers de CM, TD ou TP d'une matière. Dans un dossier « cm », « td » ou
+ * « tp », les sous-dossiers qui ne sont pas eux-mêmes un CM/TD/TP sont des
+ * regroupements par thème (ex. tp/rendering/TP1_intro) : on les parcourt aussi.
+ */
+function findItemDirs(rel: string, depth: number, inContainer = false): string[] {
   const found: string[] = [];
   for (const d of listDir(rel)) {
     if (!d.isDirectory() || d.name.startsWith(".") || IGNORED_DIRS.has(d.name)) continue;
     const child = join(rel, d.name);
     if (CONTAINER_RE.test(d.name)) {
-      if (depth < 2) found.push(...findItemDirs(child, depth + 1));
+      if (depth < 3) found.push(...findItemDirs(child, depth + 1, true));
     } else if (ITEM_RE.test(d.name)) {
       found.push(child);
+    } else if (inContainer && depth < 3) {
+      found.push(...findItemDirs(child, depth + 1, true));
     }
   }
   return found;

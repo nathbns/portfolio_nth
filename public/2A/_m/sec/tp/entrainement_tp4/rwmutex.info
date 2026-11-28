@@ -1,0 +1,288 @@
+This is rwmutex.info, produced by texi2any version 7.3 from
+rwmutex.texi.
+
+CC-BY-SA Copyright © Grégory Mounié 2026
+INFO-DIR-SECTION Concurrency
+
+
+File: rwmutex.info,  Node: Top,  Next: Indications,  Prev: (dir),  Up: (dir)
+
+RWMutex
+*******
+
+Le but de ce TP est de travailler autour d'un schéma
+lecteurs-rédacteurs.
+
+   Le but est de réaliser une implémentation complète en moniteurs d'un
+mutex partagé (Shared Mutex, RWMutex, RWLock) pour en comprendre les
+mécanismes des moniteurs et le schéma de lecteurs-rédacteurs.
+
+* Menu:
+
+* Indications::
+* Index complet::              Index complet, , Indications, Top
+
+ -- The Detailed Node Listing --
+
+Indications pour le sujet
+
+* Lecteurs-rédacteurs avec priorité aux rédacteurs::
+* Les threads en C::
+* Programmation concurrente::
+* Un moniteur en pratique::
+
+Un moniteur en pratique
+
+* Mutex::
+* Condition::
+
+
+File: rwmutex.info,  Node: Indications,  Next: Index complet,  Prev: Top,  Up: Top
+
+1 Indications pour le sujet
+***************************
+
+L'implémentation sera réalisée avec les threads de C (Partie de la norme
+ISO définissant C apparue à partir de C-11).  Sous GNU/Linux, les
+implémentations C et PThreads sont quasi identiques.  Elles sont toutes
+les deux implémentées dans la GNU Libc.  On peut utiliser les deux
+implémentations simultanément, et les mélanger si besoin.
+
+   Nous avons choisi d'utiliser les threads C pour des raisons
+pédagogiques.  En particulier les notations sont plus concises, donc
+cela permet une lecture plus facile de votre code.
+
+* Menu:
+
+* Lecteurs-rédacteurs avec priorité aux rédacteurs::
+* Les threads en C::
+* Programmation concurrente::
+* Un moniteur en pratique::
+
+
+File: rwmutex.info,  Node: Lecteurs-rédacteurs avec priorité aux rédacteurs,  Next: Les threads en C,  Prev: Indications,  Up: Indications
+
+1.1 Lecteurs-rédacteurs avec priorité aux rédacteurs
+====================================================
+
+Pour pouvoir avoir une politique d'ordonnancement, il faut pouvoir
+collecter les informations qui vont permettre d'arbitrer et construire
+les décisions.
+
+   N'hésitez jamais à ajouter des variables pour enregistrer ces
+informations.  Elles permettront aussi de faciliter le débogage et le
+test puisque leurs lectures donnent une idée de l'état de votre
+programme à chaque instant de son exécution.
+
+   Souvent de simples compteurs suffisent.
+
+   Pour un schéma lecteurs-rédacteurs donnant la priorité aux
+rédacteurs, vous devriez avoir besoin de
+  1. un compteur de threads lecteurs en attente de l'accès;
+  2. un compteur de threads rédacteurs en attente de l'accès;
+  3. un compteur de threads lecteurs étant en train de lire;
+  4. un booléen indiquant si un thread rédacteur est en train d'écrire.
+
+   Ces compteurs sont à ajouter à votre structure de donnée, en plus des
+variables qui serviront directement à la synchronisation (mutex,
+conditions).
+
+   Ces compteurs seront à mettre dans votre structure de données
+représentant un ‘rwmutex’.
+
+   Il faudra aussi mettre dans la structure ce qu'il faut pour la
+synchronisation:
+  1. un mutex pour protéger les accès à toutes les fonctions du
+     moniteur;
+  2. une variable de condition pour mettre en attente les lecteurs;
+  3. une variable de condition pour mettre en attente les écrivains.
+
+   Le pseudo-code des 4 fonctions est le suivant:
+
+   LOCK de LECTURE:
+  1. se compter comme un nouveau lecteur en attente
+  2. attendre tant la base de donnée est occupée par un rédacteur ou
+     qu'un rédacteur est en attente
+  3. se décompter des lecteurs en attente
+  4. se compter dans les lecteurs dans la base
+  5. 
+   UNLOCK de LECTURE:
+  1. se décompter comme lecteur de la base
+  2. s'il n'y a plus d'autres lecteurs dans la base réveiller un
+     rédacteur en attente s'il y en a un.
+
+   LOCK d'ÉCRITURE:
+  1. se compter comme un nouveau rédacteur en attente
+  2. attendre tant la base de donnée est occupée par un autre rédacteur
+  3. se décompter des rédacteurs en attente
+  4. indiquer que la base est occupée
+  5. 
+   UNLOCK d'ÉCRITURE:
+  1. indiquer que la base est libre
+  2. s'il y a un autre rédacteur en attente, le réveiller, sinon, s'il y
+     a des lecteurs en attente, les réveiller.
+
+   LES FONCTIONS TRY: Au lieu de se bloquer, elles renvoient un booléen
+‘true’ si tout s'est bien passé, ou ‘false’ si l'opération n'a pas eu
+lieu, car il fallait attendre.
+
+
+File: rwmutex.info,  Node: Les threads en C,  Next: Programmation concurrente,  Prev: Lecteurs-rédacteurs avec priorité aux rédacteurs,  Up: Indications
+
+1.2 Les threads en C (Norme ISO C-11/C-23)
+==========================================
+
+Toutes la documentation est dans les pages info de la GLibc.  La
+commande ‘info libc thread iso’ permet d'obtenir cette information.
+
+
+File: rwmutex.info,  Node: Programmation concurrente,  Next: Un moniteur en pratique,  Prev: Les threads en C,  Up: Indications
+
+1.3 La programmation concurrente en pratique
+============================================
+
+Vous ne voulez pas déboguer un programme concurrent.  La méthode la plus
+fiable pour éviter les bugs est de coder des algorithmes de gestion de
+la concurrence simples, limités en taille et dont la sémantique est
+limpide.
+
+   La partie programmation demande un peu d'entrainement.  C'est le rôle
+de ces TP.
+
+   C'est ce même schéma de pensée que vous retrouverez en systèmes
+distribués avec des automates manipulant de manière atomique des
+variables représentant l'état globale.  La perte de messages entre
+machine y est la norme.  Les pannes des certaines machines sont la
+norme.  Tout est donc codé dans les états (mémoire, variables) pour
+pouvoir être redondé (copie sur plusieurs machines), et faire des
+sauvegardes régulière de l'état (panne).
+
+
+File: rwmutex.info,  Node: Un moniteur en pratique,  Prev: Programmation concurrente,  Up: Indications
+
+1.4 Un moniteur en pratique
+===========================
+
+Un moniteur est un ensemble de fonctions qui vont manipuler en exclusion
+mutuelle les mêmes données en étant appelés par plusieurs threads.
+L'exclusion mutuelle va permettre de garantir que les données restent
+cohérentes.
+
+   Pour le programmeur, le fait de travailler mentalement dans un schéma
+en exclusion mutuelle est simple et pratique.  Il n'a pas besoin de se
+demander ce que font les autres threads, car aucun autre thread ne
+manipule les données.
+
+* Menu:
+
+* Mutex::
+* Condition::
+
+
+File: rwmutex.info,  Node: Mutex,  Next: Condition,  Prev: Un moniteur en pratique,  Up: Un moniteur en pratique
+
+1.4.1 Les variables mutex en pratique
+-------------------------------------
+
+L'inconvénient principal du modèle des moniteurs est qu'il faut
+correctement fabriquer cette exclusion mutuelle.
+
+   Pour cela on utilise une variable mutex ‘mtx_t’ et deux fonctions
+‘mtx_lock(...)’ et ‘mtx_unlock(...)’.
+
+   Il faut mettre un lock au début de TOUTES les fonctions du moniteurs,
+et un unlock à la fin de TOUTES ces fonctions.
+
+   TOUTES, c'est TOUTES !  Absolument TOUTES !  Celles qui lisent les
+données, celles qui écrivent les données, celles qui testent les
+données, celles qui font tout ça à la fois.  TOUTES.
+
+   En résumé, _TOUTES les fonctions du moniteur commencent par un lock
+et terminent par un unlock sur le même mutex_.
+
+
+File: rwmutex.info,  Node: Condition,  Prev: Mutex,  Up: Un moniteur en pratique
+
+1.4.2 Les variables de condition en pratique
+--------------------------------------------
+
+L'invariant des moniteurs est l'exclusion mutuelle: à tout instant, un
+seul thread au maximum manipule les données.
+
+   Lorsqu'un thread a appelé une fonction du moniteur, il possède le
+verrou sur le mutex.  Si les données ne sont pas prêtes pour lui, il va
+devoir se mettre en attente, mais il doit le faire en rendant le verrou,
+sinon aucun autre thread ne pourra modifier les données.  Les variables
+de condition sont les files d'attentes des threads qui vont garantir
+l'invariant d'exclusion mutuelle.
+
+   Après son attente, le thread va devoir reprendre cette exclusion
+mutuelle puisqu'il est en train d'exécuter une fonction du moniteur.
+
+   C'est le rôle du type Condition ‘cnd_t’ et des fonctions associées
+‘cnd_wait(...)’ ‘cnd_signal(...)’ et ‘cnd_broadcast’.
+
+   Exemple de boucle d'attente typique:
+while( (var1 == 0 && var2 >0) || var3)
+   cnd_wait(&condition, &mutex);  
+
+   Une subtilité est que le réveil ne donne pas la main au thread
+réveillé.  Lorsque le wait fait lock pour permettre le réveil, il n'est
+pas prioritaire par rapport à simplement faire lock sur le mutex en
+début de fonction.  C'est pour cela qu'il faut tester à nouveau l'état
+du système à chaque réveil.
+
+   Les attentes devraient donc toujours être codé dans une boucle
+‘while’.  Si vous pensez avoir besoin de mettre un ‘if’ et pas une
+boucle, ajoutez une ou deux variables supplémentaires pour suivre l'état
+de votre système et mettre une boucle.  ce sera plus facile à comprendre
+et à déboguer.
+
+   Sur certains OS différents de GNU/Linux, un thread être réveillé
+aussi par d'autres choses raisons que le signal/broadcast.  Le test de
+variables d'états du système dans une boucle devient alors vraiment une
+obligation.
+
+   C++ a choisi d'intégrer la boucle dans son ‘wait’ pour ne pas laisser
+le choix au programmeur.
+
+
+File: rwmutex.info,  Node: Index complet,  Prev: Indications,  Up: Top
+
+Index
+*****
+
+ [index ]
+* Menu:
+
+* Boucle d'attente des conditions:       Condition.            (line 22)
+* Condition:                             Condition.            (line  6)
+* Indications sur le sujet:              Indications.          (line  6)
+* La programmation concurrente en pratique: Programmation concurrente.
+                                                               (line  6)
+* Lecteurs-rédacteurs avec priorité aux rédacteurs: Lecteurs-rédacteurs avec priorité aux rédacteurs.
+                                                               (line  6)
+* Les threads en C:                      Les threads en C.     (line  6)
+* Mutex:                                 Mutex.                (line  6)
+* Un moniteur en pratique:               Un moniteur en pratique.
+                                                               (line  6)
+
+
+Tag Table:
+Node: Top149
+Node: Indications872
+Node: Lecteurs-rédacteurs avec priorité aux rédacteurs1693
+Node: Les threads en C4443
+Node: Programmation concurrente4827
+Node: Un moniteur en pratique5820
+Node: Mutex6482
+Node: Condition7351
+Node: Index complet9401
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+Info-documentlanguage: fr
+End:

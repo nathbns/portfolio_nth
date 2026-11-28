@@ -10,6 +10,7 @@
 | [TD2 : attributs et typage](td2_attributs_typage/) | Corrigé détaillé en vidéo et [écrit](td2_attributs_typage/corrige.md). Vidéos : [Exercices 2.1 à 2.3](td2_attributs_typage/partie1.mp4) ; [Exercices 2.4 à 2.8](td2_attributs_typage/partie2.mp4) |
 | [TD3 : sémantique de MiniWhile](td3_semantique/) | Corrigé détaillé en vidéo et [écrit](td3_semantique/corrige.md). Vidéos : [Exercices 1 à 3](td3_semantique/partie1.mp4) ; [§3.3](td3_semantique/partie2.mp4) |
 | [TD4 : génération de code 3 adresses](td4_generation_code/) | Corrigé détaillé en vidéo et [écrit](td4_generation_code/corrige.md). Vidéos : [Exercices 4.1 à 4.4](td4_generation_code/partie1.mp4) ; [Exercices 4.5 à 4.8](td4_generation_code/partie2.mp4) |
+| [TD5 : CFG et optimisations locales](td5_cfg_optimisations/) | Corrigé détaillé en vidéo et [écrit](td5_cfg_optimisations/corrige.md). Vidéos : [Exercices 1 et 2](td5_cfg_optimisations/partie1.mp4) ; [Exercices 3 et 4](td5_cfg_optimisations/partie2.mp4) ; [Exercices 5 et 6](td5_cfg_optimisations/partie3.mp4) |
 
 Examen : lundi 7 décembre, 9h00-10h30, écrit sans document (75 % de la note, 25 % TP).
 

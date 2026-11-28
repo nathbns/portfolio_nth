@@ -1,0 +1,119 @@
+.\" -*- mode: troff; coding: utf-8 -*-
+.TH RWMutex "2026" "RWMutex 1.0"
+.SH NAME
+RWMutex \- Lecteurs-rédacteurs multi-threads
+.SH SYNOPSIS
+.LP
+.B Rwmutex
+.SH COPYRIGHT
+.if n rwmutex, Copyright (C) 2026 by Grégory Mounié
+.if t rwmutex, Copyright \(co 2026 by Grégory Mounié
+.SH DESCRIPTION
+.B RWMutex
+est un ensemble de programmes de synchronisation sur un schéma de
+lecteurs-rédacteurs. Un but secondaire est de comparer des décisions
+d'implémentations différentes.
+
+Un schéma lecteurs-rédacteurs consiste à garantir l'exclusion mutuelle
+entre chaque rédacteur, tout en permettant aux lecteurs, lorsqu'il n'y
+a pas de rédaction en cours, de lire simultanément à plusieurs les
+données.
+
+Les détails d'implémentations sont dans le fichier info
+.I rwmutex.info
+
+.PP
+.SH OPTIONS
+Aucune option
+.PP
+.SH PRÉREQUIS 1
+Compilez et exécutez le premier squelette (
+.B mesure_perf_rwmutex_posix.c
+).
+
+Que se passe-t-il ?
+
+.BR "Une machine physique ou virtuelle mono-coeur, ou tout autre environnement simulant le parallélisme (valgrind, etc.), ne sont pas adaptés pour faire ce TP."
+
+.PP
+.SH VOTRE IMPLÉMENTATION C-23 DOIT DONNER LA PRIORITÉ AUX ÉCRIVAINS
+Vous aurez à copier le squelette de départ
+.B mesure_perf_rwmutex_moniteur.c
+et à implémenter deux fichiers
+.I rwmutex.h
+et
+.I rwmutex.c
+qui contiendront les fonctions du moniteur dont l'implémentation
+donnera la priorité aux rédacteurs.
+
+Votre implémentation utilisera les fonctions, mutex et conditions de
+la norme C-23 du langage C.
+
+.PP									
+.SH LA STUCTURE DE DONNÉES
+
+En plus de ce qu'il faut pour faire les synchronisations en C-23 (Les
+threads et les moniteurs sont apparus dans la norme C-11) (mutex,
+conditions), votre type
+.I rwmutex_t
+contiendra:
+ 
+Lire le fichier
+.I rwmutex.info
+pour les détails d'implémentation.
+
+La structure contient aussi les variables nécessaires à la
+synchronisation (mutex, conditions).
+
+.PP									
+.SH LES FONCTIONS DU MONITEUR
+
+Vous avez à implémenter les fonctions manipulant la structure de
+synchronisation:
+.B void rwmutex_init(rwmutex_t *l);
+,
+.B void rwmutex_rdlock(rwmutex_t *l);
+,
+.B void rwmutex_rdunlock(rwmutex_t *l);
+,
+.B void rwmutex_wrlock(rwmutex_t *l);
+,
+.B void rwmutex_wrunlock(rwmutex_t *l);
+,
+.B bool rwmutex_tryrdlock(rwmutex_t *l);
+(dont vous pouvez faire une première implémentation triviale qui renvoie toujours false, le temps de faire le reste)
+.B bool rwmutex_trywrlock(rwmutex_t *l);
+(dont vous pouvez faire une première implémentation triviale qui renvoie toujours false, le temps de faire le reste)
+
+Compilez et exécutez votre implémentation. Avez-vous le comportement attendu ?
+
+
+.PP									
+.SH CHANGEZ LA PRIORITÉ DE LA VERSION POSIX
+
+Les threads POSIX (PTHREADS) et les objets de cette norme ont beaucoup plus
+d'options de réglages que ce que propose la plupart des langages de
+programmation, y compris C.
+
+Il est possible de donner la priorité aux
+écrivains dans les
+.I pthread_rwlock
+.
+Donner la priorité aux écrivains dans la version POSIX, en utilisant les bons réglages
+.B mesure_perf_rwmutex_posix.c
+
+.PP									
+.SH LA DESTRUCTION DU MONITEUR
+
+Parce que ce n'est pas le but premier de ce TP, le sujet néglige la
+terminaison et la destruction de la structure. Sous GNU/Linux, cela
+n'a pas vraiment d'importance car les mutex et les conditions ne sont
+que des entiers ou leurs équivalents (dans votre programme, côté
+système il y a d'autres structures). Mais ce n'est pas le cas dans
+tous les systèmes.
+
+Ajoutez une fonction
+.B void rwmutex_destroy(rwmutex_t *l);
+qui libérera proprement votre structure de donnée et utilisez-là dans le code.
+
+Faites de même dans la version POSIX.

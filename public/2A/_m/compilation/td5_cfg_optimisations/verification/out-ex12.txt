@@ -1,0 +1,292 @@
+TD5 Compilation, exercices 1 et 2 : sortie de cfg.py
+
+==============================================================================
+EXERCICE 1 : listing de l'énoncé
+==============================================================================
+Listing (numéros de lignes du listing) :
+   1  ##Automatically generated RISCXX code
+   2  ##non executable 3-Address instructions version
+   3          li temp_2, 1
+   4          mv temp_0, temp_2
+   5          li temp_3, 7
+   6          mv temp_1, temp_3
+   7  lbl_begin_while_1_main:
+   8          li temp_4, 0
+   9          bge temp_0, temp_1, lbl_end_relational_3_main
+  10          li temp_4, 1
+  11  lbl_end_relational_3_main:
+  12          beq temp_4, zero, lbl_end_while_2_main
+  13          li temp_5, 1
+  14          add temp_6, temp_0, temp_5
+  15          mv temp_0, temp_6
+  16          j lbl_begin_while_1_main
+  17  lbl_end_while_2_main:
+  18          mv a0, temp_0
+  19          call println_int
+
+Leaders (règles de la diapo 53) :
+  ligne  3  li temp_2, 1                                   <- règle 1 : première instruction du code
+  ligne  7  lbl_begin_while_1_main:                        <- règle 2 : cible du « j » de la ligne 16
+  ligne 10  li temp_4, 1                                   <- règle 3 : suit le « bge » de la ligne 9
+  ligne 11  lbl_end_relational_3_main:                     <- règle 2 : cible du « bge » de la ligne 9
+  ligne 13  li temp_5, 1                                   <- règle 3 : suit le « beq » de la ligne 12
+  ligne 17  lbl_end_while_2_main:                          <- règle 2 : cible du « beq » de la ligne 12 ; règle 3 : suit le « j » de la ligne 16
+  labels qui ne sont la cible d'aucun saut : aucun
+  si un « call » terminait aussi un bloc (diapo 49) : leaders identiques
+
+Blocs de base : 6
+  B1 : lignes 3-6    (4 instructions)
+         3  li temp_2, 1
+         4  mv temp_0, temp_2
+         5  li temp_3, 7
+         6  mv temp_1, temp_3
+  B2 : lignes 7-9    (2 instructions)
+         7  lbl_begin_while_1_main:
+         8  li temp_4, 0
+         9  bge temp_0, temp_1, lbl_end_relational_3_main
+  B3 : lignes 10     (1 instruction)
+        10  li temp_4, 1
+  B4 : lignes 11-12  (1 instruction)
+        11  lbl_end_relational_3_main:
+        12  beq temp_4, zero, lbl_end_while_2_main
+  B5 : lignes 13-16  (4 instructions)
+        13  li temp_5, 1
+        14  add temp_6, temp_0, temp_5
+        15  mv temp_0, temp_6
+        16  j lbl_begin_while_1_main
+  B6 : lignes 17-19  (2 instructions)
+        17  lbl_end_while_2_main:
+        18  mv a0, temp_0
+        19  call println_int
+
+Arcs du CFG : 8 (dont 1 vers la sortie)
+  B1 -> B2    en séquence (fall-through)
+  B2 -> B3    saut non pris : temp_0 < temp_1
+  B2 -> B4    saut pris : temp_0 >= temp_1
+  B3 -> B4    en séquence (fall-through)
+  B4 -> B5    saut non pris : temp_4 != zero
+  B4 -> B6    saut pris : temp_4 == zero
+  B5 -> B2    j : toujours   <- arc retour (boucle)
+  B6 -> EXIT  en séquence (fall-through)
+  prédécesseurs : B1 <- {entrée}, B2 <- {B1, B5}, B3 <- {B2}, B4 <- {B2, B3}, B5 <- {B4}, B6 <- {B4}
+
+Exécution (interprète) :
+  affiché par println_int : [7]
+  valeurs finales : {'x': 7, 'y': 7}
+  instructions exécutées (labels non comptés) : 57
+  passages par bloc : B1=1, B2=7, B3=6, B4=7, B5=6, B6=1
+  branchements (ligne, test, pris ?) :
+    l. 9 bge temp_0=1, temp_1=7 -> non pris
+    l.12 beq temp_4=1, zero=0 -> non pris
+    l. 9 bge temp_0=2, temp_1=7 -> non pris
+    l.12 beq temp_4=1, zero=0 -> non pris
+    l. 9 bge temp_0=3, temp_1=7 -> non pris
+    l.12 beq temp_4=1, zero=0 -> non pris
+    l. 9 bge temp_0=4, temp_1=7 -> non pris
+    l.12 beq temp_4=1, zero=0 -> non pris
+    l. 9 bge temp_0=5, temp_1=7 -> non pris
+    l.12 beq temp_4=1, zero=0 -> non pris
+    l. 9 bge temp_0=6, temp_1=7 -> non pris
+    l.12 beq temp_4=1, zero=0 -> non pris
+    l. 9 bge temp_0=7, temp_1=7 -> pris
+    l.12 beq temp_4=0, zero=0 -> pris
+
+Vivacité (variables vivantes en entrée / sortie de chaque bloc) :
+  B1 : in = {}   out = {temp_0, temp_1}
+  B2 : in = {temp_0, temp_1}   out = {temp_0, temp_1, temp_4}
+  B3 : in = {temp_0, temp_1}   out = {temp_0, temp_1, temp_4}
+  B4 : in = {temp_0, temp_1, temp_4}   out = {temp_0, temp_1}
+  B5 : in = {temp_0, temp_1}   out = {temp_0, temp_1}
+  B6 : in = {temp_0}   out = {}
+  vivants juste AVANT chaque ligne :
+     3  li temp_2, 1                                   -
+     4  mv temp_0, temp_2                              temp_2
+     5  li temp_3, 7                                   temp_0
+     6  mv temp_1, temp_3                              temp_0, temp_3
+     7  lbl_begin_while_1_main:                        temp_0, temp_1
+     8  li temp_4, 0                                   temp_0, temp_1
+     9  bge temp_0, temp_1, lbl_end_relational_3_main  temp_0, temp_1, temp_4
+    10  li temp_4, 1                                   temp_0, temp_1
+    11  lbl_end_relational_3_main:                     temp_0, temp_1, temp_4
+    12  beq temp_4, zero, lbl_end_while_2_main         temp_0, temp_1, temp_4
+    13  li temp_5, 1                                   temp_0, temp_1
+    14  add temp_6, temp_0, temp_5                     temp_0, temp_1, temp_5
+    15  mv temp_0, temp_6                              temp_1, temp_6
+    16  j lbl_begin_while_1_main                       temp_0, temp_1
+    17  lbl_end_while_2_main:                          temp_0
+    18  mv a0, temp_0                                  temp_0
+    19  call println_int                               -
+  maximum de temporaires vivants en même temps : 3
+  temporaires : 7 ; paires en interférence : 7
+    temp_0-temp_1  temp_0-temp_3  temp_0-temp_4  temp_0-temp_5  temp_1-temp_4  temp_1-temp_5  temp_1-temp_6
+  nombre minimal d'emplacements (coloriage exact du graphe d'interférence) : 3
+    un coloriage possible : temp_0, temp_2, temp_6 | temp_1, temp_3 | temp_4, temp_5
+
+--- Exercice 1, question 2 : source MiniC proposée ---
+int main() {
+  int x, y;
+  x = 1;
+  y = 7;
+  while (x < y) {
+    x = x + 1;
+  }
+  println_int(x);
+  return 0;
+}
+Code généré par les règles du cours depuis cette source == listing de l'énoncé : True
+  (temporaires : x -> temp_0, y -> temp_1 ; premier label n° 1)
+  avec dest pris APRÈS les opérandes dans '<' : identique aussi ? True
+Source fausse « int x; x = 1; while (x < 7) {x = x + 1;} println_int(x); » : même code ? False ; elle donne :
+        li temp_1, 1
+        mv temp_0, temp_1
+lbl_begin_while_1_main:
+        li temp_3, 7
+        li temp_2, 0
+        bge temp_0, temp_3, lbl_end_relational_3_main
+        li temp_2, 1
+lbl_end_relational_3_main:
+        beq temp_2, zero, lbl_end_while_2_main
+        li temp_4, 1
+        add temp_5, temp_0, temp_4
+        mv temp_0, temp_5
+        j lbl_begin_while_1_main
+lbl_end_while_2_main:
+        mv a0, temp_0
+        call println_int
+
+--- Optimisation locale dans le bloc du corps de boucle ---
+  bloc du corps : B5 ; vivants en sortie : ['temp_0', 'temp_1']
+  temp_5 et temp_6 vivants en sortie de ce bloc ? False
+  remplacement : li temp_5, 1 / add temp_6, temp_0, temp_5 / mv temp_0, temp_6  ->  addi temp_0, temp_0, 1
+  version optimisée : affiche [7] (original : [7]) ; 45 instructions exécutées au lieu de 57 ; 6 blocs, mêmes arcs : True
+
+==============================================================================
+EXERCICE 2 : code 3 adresses proposé pour le programme de l'énoncé
+==============================================================================
+Listing (numéros de lignes du listing) :
+   1          li temp_1, 0
+   2          mv temp_0, temp_1
+   3  lbl_begin_while_1_main:
+   4          li temp_3, 4
+   5          li temp_2, 0
+   6          bge temp_0, temp_3, lbl_end_relational_3_main
+   7          li temp_2, 1
+   8  lbl_end_relational_3_main:
+   9          beq temp_2, zero, lbl_end_while_2_main
+  10          li temp_4, 1
+  11          add temp_5, temp_0, temp_4
+  12          mv temp_0, temp_5
+  13          j lbl_begin_while_1_main
+  14  lbl_end_while_2_main:
+
+Leaders (règles de la diapo 53) :
+  ligne  1  li temp_1, 0                                   <- règle 1 : première instruction du code
+  ligne  3  lbl_begin_while_1_main:                        <- règle 2 : cible du « j » de la ligne 13
+  ligne  7  li temp_2, 1                                   <- règle 3 : suit le « bge » de la ligne 6
+  ligne  8  lbl_end_relational_3_main:                     <- règle 2 : cible du « bge » de la ligne 6
+  ligne 10  li temp_4, 1                                   <- règle 3 : suit le « beq » de la ligne 9
+  ligne 14  lbl_end_while_2_main:                          <- règle 2 : cible du « beq » de la ligne 9 ; règle 3 : suit le « j » de la ligne 13
+  labels qui ne sont la cible d'aucun saut : aucun
+  si un « call » terminait aussi un bloc (diapo 49) : leaders identiques
+
+Blocs de base : 6
+  B1 : lignes 1-2    (2 instructions)
+         1  li temp_1, 0
+         2  mv temp_0, temp_1
+  B2 : lignes 3-6    (3 instructions)
+         3  lbl_begin_while_1_main:
+         4  li temp_3, 4
+         5  li temp_2, 0
+         6  bge temp_0, temp_3, lbl_end_relational_3_main
+  B3 : lignes 7      (1 instruction)
+         7  li temp_2, 1
+  B4 : lignes 8-9    (1 instruction)
+         8  lbl_end_relational_3_main:
+         9  beq temp_2, zero, lbl_end_while_2_main
+  B5 : lignes 10-13  (4 instructions)
+        10  li temp_4, 1
+        11  add temp_5, temp_0, temp_4
+        12  mv temp_0, temp_5
+        13  j lbl_begin_while_1_main
+  B6 : lignes 14     (0 instruction)
+        14  lbl_end_while_2_main:
+
+Arcs du CFG : 8 (dont 1 vers la sortie)
+  B1 -> B2    en séquence (fall-through)
+  B2 -> B3    saut non pris : temp_0 < temp_3
+  B2 -> B4    saut pris : temp_0 >= temp_3
+  B3 -> B4    en séquence (fall-through)
+  B4 -> B5    saut non pris : temp_2 != zero
+  B4 -> B6    saut pris : temp_2 == zero
+  B5 -> B2    j : toujours   <- arc retour (boucle)
+  B6 -> EXIT  en séquence (fall-through)
+  prédécesseurs : B1 <- {entrée}, B2 <- {B1, B5}, B3 <- {B2}, B4 <- {B2, B3}, B5 <- {B4}, B6 <- {B4}
+
+Exécution (interprète) :
+  affiché par println_int : rien
+  valeurs finales : {'x': 4}
+  instructions exécutées (labels non comptés) : 42
+  passages par bloc : B1=1, B2=5, B3=4, B4=5, B5=4, B6=1
+  branchements (ligne, test, pris ?) :
+    l. 6 bge temp_0=0, temp_3=4 -> non pris
+    l. 9 beq temp_2=1, zero=0 -> non pris
+    l. 6 bge temp_0=1, temp_3=4 -> non pris
+    l. 9 beq temp_2=1, zero=0 -> non pris
+    l. 6 bge temp_0=2, temp_3=4 -> non pris
+    l. 9 beq temp_2=1, zero=0 -> non pris
+    l. 6 bge temp_0=3, temp_3=4 -> non pris
+    l. 9 beq temp_2=1, zero=0 -> non pris
+    l. 6 bge temp_0=4, temp_3=4 -> pris
+    l. 9 beq temp_2=0, zero=0 -> pris
+
+Vivacité (variables vivantes en entrée / sortie de chaque bloc) :
+  B1 : in = {}   out = {temp_0}
+  B2 : in = {temp_0}   out = {temp_0, temp_2}
+  B3 : in = {temp_0}   out = {temp_0, temp_2}
+  B4 : in = {temp_0, temp_2}   out = {temp_0}
+  B5 : in = {temp_0}   out = {temp_0}
+  B6 : in = {}   out = {}
+  vivants juste AVANT chaque ligne :
+     1  li temp_1, 0                                   -
+     2  mv temp_0, temp_1                              temp_1
+     3  lbl_begin_while_1_main:                        temp_0
+     4  li temp_3, 4                                   temp_0
+     5  li temp_2, 0                                   temp_0, temp_3
+     6  bge temp_0, temp_3, lbl_end_relational_3_main  temp_0, temp_2, temp_3
+     7  li temp_2, 1                                   temp_0
+     8  lbl_end_relational_3_main:                     temp_0, temp_2
+     9  beq temp_2, zero, lbl_end_while_2_main         temp_0, temp_2
+    10  li temp_4, 1                                   temp_0
+    11  add temp_5, temp_0, temp_4                     temp_0, temp_4
+    12  mv temp_0, temp_5                              temp_5
+    13  j lbl_begin_while_1_main                       temp_0
+    14  lbl_end_while_2_main:                          -
+  maximum de temporaires vivants en même temps : 3
+  temporaires : 6 ; paires en interférence : 4
+    temp_0-temp_2  temp_0-temp_3  temp_0-temp_4  temp_2-temp_3
+  nombre minimal d'emplacements (coloriage exact du graphe d'interférence) : 3
+    un coloriage possible : temp_0, temp_1, temp_5 | temp_2, temp_4 | temp_3
+
+--- Exercice 2 : vérification par le générateur ---
+int x;
+x=0;
+while (x < 4){
+   x=x+1;
+}
+Code écrit à la main == code produit par les règles (dest d'abord, diapo 25) : True
+Variante si le générateur prenait dest APRÈS les opérandes dans '<' :
+        li temp_1, 0
+        mv temp_0, temp_1
+lbl_begin_while_1_main:
+        li temp_2, 4
+        li temp_3, 0
+        bge temp_0, temp_2, lbl_end_relational_3_main
+        li temp_3, 1
+lbl_end_relational_3_main:
+        beq temp_3, zero, lbl_end_while_2_main
+        li temp_4, 1
+        add temp_5, temp_0, temp_4
+        mv temp_0, temp_5
+        j lbl_begin_while_1_main
+lbl_end_while_2_main:
+  -> même découpage en blocs et mêmes arcs : True ; x final = 4

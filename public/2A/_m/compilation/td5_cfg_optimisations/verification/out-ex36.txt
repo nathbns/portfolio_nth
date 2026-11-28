@@ -1,0 +1,500 @@
+# out-ex36.txt : sorties de python3 -I ex34_sethi_ullman.py puis python3 -I ex56_regalloc.py (2026-11-24 23:07, Python 3.14.3)
+TD5 Compilation - section 5.2 - verification des exercices 3 et 4
+Convention : v vivante au point p_i (juste apres la ligne i) ssi def(v) <= i < derniere lecture(v) ;
+le resultat de E est vivant en sortie. Les feuilles valent rho = 1 (ld ou li).
+
+====================================================================================================
+Exemples du cours (CM8)
+====================================================================================================
+Diapo 28/32 : memes 9 instructions, deux ordres (t1 lu en memoire, st(y,t8) a la fin).
+
+Diapo 28/32, ordre de gauche :
+  n°  instruction        t1 t2 t3 t4 t5 t6 t7 t8 vivants apres la ligne
+   1  (a) t1 := ld(x)    ┬                       1  {t1}
+   2  (b) t2 := t1 + 4   │  ┬                    2  {t1, t2}
+   3  (c) t3 := t1 * 8   │  │  ┬                 3  {t1, t2, t3}
+   4  (d) t4 := t1 - 4   │  │  │  ┬              4  {t1, t2, t3, t4}   <-- max
+   5  (e) t5 := t1 / 2   ┴  │  │  │  ┬           4  {t2, t3, t4, t5}   <-- max
+   6  (f) t6 := t2 * t3     ┴  ┴  │  │  ┬        3  {t4, t5, t6}
+   7  (g) t7 := t4 - t5           ┴  ┴  │  ┬     2  {t6, t7}
+   8  (h) t8 := t6 * t7                 ┴  ┴  ┬  1  {t8}
+   9  (i) st(y,t8)                            ┴  0  {}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+           t1 : 1 -> 5
+           t2 : 2 -> 6
+           t3 : 3 -> 6
+           t4 : 4 -> 7
+           t5 : 5 -> 7
+           t6 : 6 -> 8
+           t7 : 7 -> 8
+           t8 : 8 -> 9
+  Maximum de valeurs vivantes simultanement : 4, aux points p_4 (entre ligne 4 et ligne 5), p_5 (entre ligne 5 et ligne 6)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 3 4 4 3 2 1 -> max 4
+
+Diapo 28/32, ordre de droite :
+  n°  instruction        t1 t4 t5 t7 t3 t2 t6 t8 vivants apres la ligne
+   1  (a) t1 := ld(x)    ┬                       1  {t1}
+   2  (d) t4 := t1 - 4   │  ┬                    2  {t1, t4}
+   3  (e) t5 := t1 / 2   │  │  ┬                 3  {t1, t4, t5}   <-- max
+   4  (g) t7 := t4 - t5  │  ┴  ┴  ┬              2  {t1, t7}
+   5  (c) t3 := t1 * 8   │        │  ┬           3  {t1, t3, t7}   <-- max
+   6  (b) t2 := t1 + 4   ┴        │  │  ┬        3  {t2, t3, t7}   <-- max
+   7  (f) t6 := t2 * t3           │  ┴  ┴  ┬     2  {t6, t7}
+   8  (h) t8 := t6 * t7           ┴        ┴  ┬  1  {t8}
+   9  (i) st(y,t8)                            ┴  0  {}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+           t1 : 1 -> 6
+           t4 : 2 -> 4
+           t5 : 3 -> 4
+           t7 : 4 -> 8
+           t3 : 5 -> 7
+           t2 : 6 -> 7
+           t6 : 7 -> 8
+           t8 : 8 -> 9
+  Maximum de valeurs vivantes simultanement : 3, aux points p_3 (entre ligne 3 et ligne 4), p_5 (entre ligne 5 et ligne 6), p_6 (entre ligne 6 et ligne 7)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 3 2 3 3 2 1 -> max 3
+
+Diapo 31/32 : b*b + 4*(a*c), a, b, c deja en registres (non comptes).
+  n°  instruction           tmp1 tmp2 tmp3 tmp4 tmp5 vivants apres la ligne
+   1  mul tmp1, b, b        ┬                        1  {tmp1}
+   2  mul tmp2, a, c        │    ┬                   2  {tmp1, tmp2}
+   3  li tmp3, 4            │    │    ┬              3  {tmp1, tmp2, tmp3}   <-- max
+   4  mul tmp4, tmp2, tmp3  │    ┴    ┴    ┬         2  {tmp1, tmp4}
+   5  add tmp5, tmp1, tmp4  ┴              ┴    ┬    1  {tmp5}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+         tmp1 : 1 -> 5
+         tmp2 : 2 -> 4
+         tmp3 : 3 -> 4
+         tmp4 : 4 -> 5
+         tmp5 : 5 -> 6
+  Maximum de valeurs vivantes simultanement : 3, aux points p_3 (entre ligne 3 et ligne 4)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 3 2 -> max 3
+  rho(b*b + 4*(a*c)) = 3 (diapo : 3)
+
+====================================================================================================
+Exercice 3 : E = (((a + b) * (a - b)) + 1)
+====================================================================================================
+AST avec rho sur chaque noeud :
+   racine: +   rho = 3   (noeud (((a + b) * (a - b)) + 1))
+       fils gauche: *   rho = 3   (noeud ((a + b) * (a - b)))
+           fils gauche: +   rho = 2   (noeud (a + b))
+               fils gauche: a   rho = 1   (feuille a)
+               fils droit : b   rho = 1   (feuille b)
+           fils droit : -   rho = 2   (noeud (a - b))
+               fils gauche: a   rho = 1   (feuille a)
+               fils droit : b   rho = 1   (feuille b)
+       fils droit : 1   rho = 1   (feuille 1)
+rho(E) = 3  => nombre minimal de registres (sans move ni decoupage d'intervalle)
+
+Code de Sethi-Ullman (temporaires numerotes dans l'ordre d'emission, temp_k defini ligne k) :
+   1  ld  temp_1, [a]              # noeud Eggg
+   2  ld  temp_2, [b]              # noeud Eggd
+   3  add temp_3, temp_1, temp_2   # noeud Egg
+   4  ld  temp_4, [a]              # noeud Egdg
+   5  ld  temp_5, [b]              # noeud Egdd
+   6  sub temp_6, temp_4, temp_5   # noeud Egd
+   7  mul temp_7, temp_3, temp_6   # noeud Eg
+   8  li  temp_8, 1                # noeud Ed
+   9  add temp_9, temp_7, temp_8   # noeud E
+  ordonnancement correct (def avant use) : True
+  simulation avec {'a': 5, 'b': 3} : temp_9 = 17 ; valeur attendue 17 -> OK
+
+Vivacite du code de Sethi-Ullman :
+  n°  instruction                 t1 t2 t3 t4 t5 t6 t7 t8 t9 vivants apres la ligne
+   1  ld  temp_1, [a]             ┬                          1  {temp_1}
+   2  ld  temp_2, [b]             │  ┬                       2  {temp_1, temp_2}
+   3  add temp_3, temp_1, temp_2  ┴  ┴  ┬                    1  {temp_3}
+   4  ld  temp_4, [a]                   │  ┬                 2  {temp_3, temp_4}
+   5  ld  temp_5, [b]                   │  │  ┬              3  {temp_3, temp_4, temp_5}   <-- max
+   6  sub temp_6, temp_4, temp_5        │  ┴  ┴  ┬           2  {temp_3, temp_6}
+   7  mul temp_7, temp_3, temp_6        ┴        ┴  ┬        1  {temp_7}
+   8  li  temp_8, 1                                 │  ┬     2  {temp_7, temp_8}
+   9  add temp_9, temp_7, temp_8                    ┴  ┴  ┬  1  {temp_9}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+       temp_1 : 1 -> 3
+       temp_2 : 2 -> 3
+       temp_3 : 3 -> 7
+       temp_4 : 4 -> 6
+       temp_5 : 5 -> 6
+       temp_6 : 6 -> 7
+       temp_7 : 7 -> 9
+       temp_8 : 8 -> 9
+       temp_9 : 9 -> 10
+  Maximum de valeurs vivantes simultanement : 3, aux points p_5 (entre ligne 5 et ligne 6)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 1 2 3 2 1 2 -> max 3
+
+  Tous les ordres du meme graphe de dependances : 640 ordonnancements valides ; max-vivants minimal = 3 (atteint par 64 ordres), pire = 5
+  Linear scan sur le code SU : 3 registres physiques ; temp_1->t0, temp_2->t1, temp_3->t0, temp_4->t1, temp_5->t2, temp_6->t1, temp_7->t0, temp_8->t1, temp_9->t0
+      ld  t0, [a]
+      ld  t1, [b]
+      add t0, t0, t1
+      ld  t1, [a]
+      ld  t2, [b]
+      sub t1, t1, t2
+      mul t0, t0, t1
+      li  t1, 1
+      add t0, t0, t1
+  simulation registres physiques : t0 = 17 -> OK
+
+Code 3 adresses dirige par la syntaxe (toujours e1 puis e2) :
+   1  ld  temp_1, [a]              # noeud Eggg
+   2  ld  temp_2, [b]              # noeud Eggd
+   3  add temp_3, temp_1, temp_2   # noeud Egg
+   4  ld  temp_4, [a]              # noeud Egdg
+   5  ld  temp_5, [b]              # noeud Egdd
+   6  sub temp_6, temp_4, temp_5   # noeud Egd
+   7  mul temp_7, temp_3, temp_6   # noeud Eg
+   8  li  temp_8, 1                # noeud Ed
+   9  add temp_9, temp_7, temp_8   # noeud E
+  ordonnancement correct (def avant use) : True
+  simulation : temp_9 = 17 -> OK
+  identique au code SU ligne a ligne : True
+
+Vivacite du code dirige par la syntaxe :
+  n°  instruction                 t1 t2 t3 t4 t5 t6 t7 t8 t9 vivants apres la ligne
+   1  ld  temp_1, [a]             ┬                          1  {temp_1}
+   2  ld  temp_2, [b]             │  ┬                       2  {temp_1, temp_2}
+   3  add temp_3, temp_1, temp_2  ┴  ┴  ┬                    1  {temp_3}
+   4  ld  temp_4, [a]                   │  ┬                 2  {temp_3, temp_4}
+   5  ld  temp_5, [b]                   │  │  ┬              3  {temp_3, temp_4, temp_5}   <-- max
+   6  sub temp_6, temp_4, temp_5        │  ┴  ┴  ┬           2  {temp_3, temp_6}
+   7  mul temp_7, temp_3, temp_6        ┴        ┴  ┬        1  {temp_7}
+   8  li  temp_8, 1                                 │  ┬     2  {temp_7, temp_8}
+   9  add temp_9, temp_7, temp_8                    ┴  ┴  ┬  1  {temp_9}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+       temp_1 : 1 -> 3
+       temp_2 : 2 -> 3
+       temp_3 : 3 -> 7
+       temp_4 : 4 -> 6
+       temp_5 : 5 -> 6
+       temp_6 : 6 -> 7
+       temp_7 : 7 -> 9
+       temp_8 : 8 -> 9
+       temp_9 : 9 -> 10
+  Maximum de valeurs vivantes simultanement : 3, aux points p_5 (entre ligne 5 et ligne 6)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 1 2 3 2 1 2 -> max 3
+
+  Graphe de dependances (aretes noeud fils -> noeud pere) identique pour les deux codes : True (8 aretes)
+
+====================================================================================================
+Exercice 4 : E = ((n * (n + 1)) + (2 * n))
+====================================================================================================
+AST avec rho sur chaque noeud :
+   racine: +   rho = 3   (noeud ((n * (n + 1)) + (2 * n)))
+       fils gauche: *   rho = 2   (noeud (n * (n + 1)))
+           fils gauche: n   rho = 1   (feuille n)
+           fils droit : +   rho = 2   (noeud (n + 1))
+               fils gauche: n   rho = 1   (feuille n)
+               fils droit : 1   rho = 1   (feuille 1)
+       fils droit : *   rho = 2   (noeud (2 * n))
+           fils gauche: 2   rho = 1   (feuille 2)
+           fils droit : n   rho = 1   (feuille n)
+rho(E) = 3  => nombre minimal de registres (sans move ni decoupage d'intervalle)
+
+Code de Sethi-Ullman (temporaires numerotes dans l'ordre d'emission, temp_k defini ligne k) :
+   1  ld  temp_1, [n]              # noeud Egdg
+   2  li  temp_2, 1                # noeud Egdd
+   3  add temp_3, temp_1, temp_2   # noeud Egd
+   4  ld  temp_4, [n]              # noeud Egg
+   5  mul temp_5, temp_4, temp_3   # noeud Eg
+   6  li  temp_6, 2                # noeud Edg
+   7  ld  temp_7, [n]              # noeud Edd
+   8  mul temp_8, temp_6, temp_7   # noeud Ed
+   9  add temp_9, temp_5, temp_8   # noeud E
+  ordonnancement correct (def avant use) : True
+  simulation avec {'n': 7} : temp_9 = 70 ; valeur attendue 70 -> OK
+
+Vivacite du code de Sethi-Ullman :
+  n°  instruction                 t1 t2 t3 t4 t5 t6 t7 t8 t9 vivants apres la ligne
+   1  ld  temp_1, [n]             ┬                          1  {temp_1}
+   2  li  temp_2, 1               │  ┬                       2  {temp_1, temp_2}
+   3  add temp_3, temp_1, temp_2  ┴  ┴  ┬                    1  {temp_3}
+   4  ld  temp_4, [n]                   │  ┬                 2  {temp_3, temp_4}
+   5  mul temp_5, temp_4, temp_3        ┴  ┴  ┬              1  {temp_5}
+   6  li  temp_6, 2                           │  ┬           2  {temp_5, temp_6}
+   7  ld  temp_7, [n]                         │  │  ┬        3  {temp_5, temp_6, temp_7}   <-- max
+   8  mul temp_8, temp_6, temp_7              │  ┴  ┴  ┬     2  {temp_5, temp_8}
+   9  add temp_9, temp_5, temp_8              ┴        ┴  ┬  1  {temp_9}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+       temp_1 : 1 -> 3
+       temp_2 : 2 -> 3
+       temp_3 : 3 -> 5
+       temp_4 : 4 -> 5
+       temp_5 : 5 -> 9
+       temp_6 : 6 -> 8
+       temp_7 : 7 -> 8
+       temp_8 : 8 -> 9
+       temp_9 : 9 -> 10
+  Maximum de valeurs vivantes simultanement : 3, aux points p_7 (entre ligne 7 et ligne 8)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 1 2 1 2 3 2 -> max 3
+
+  Tous les ordres du meme graphe de dependances : 896 ordonnancements valides ; max-vivants minimal = 3 (atteint par 80 ordres), pire = 5
+  Linear scan sur le code SU : 3 registres physiques ; temp_1->t0, temp_2->t1, temp_3->t0, temp_4->t1, temp_5->t0, temp_6->t1, temp_7->t2, temp_8->t1, temp_9->t0
+      ld  t0, [n]
+      li  t1, 1
+      add t0, t0, t1
+      ld  t1, [n]
+      mul t0, t1, t0
+      li  t1, 2
+      ld  t2, [n]
+      mul t1, t1, t2
+      add t0, t0, t1
+  simulation registres physiques : t0 = 70 -> OK
+
+Code 3 adresses dirige par la syntaxe (toujours e1 puis e2) :
+   1  ld  temp_1, [n]              # noeud Egg
+   2  ld  temp_2, [n]              # noeud Egdg
+   3  li  temp_3, 1                # noeud Egdd
+   4  add temp_4, temp_2, temp_3   # noeud Egd
+   5  mul temp_5, temp_1, temp_4   # noeud Eg
+   6  li  temp_6, 2                # noeud Edg
+   7  ld  temp_7, [n]              # noeud Edd
+   8  mul temp_8, temp_6, temp_7   # noeud Ed
+   9  add temp_9, temp_5, temp_8   # noeud E
+  ordonnancement correct (def avant use) : True
+  simulation : temp_9 = 70 -> OK
+  identique au code SU ligne a ligne : False
+
+Vivacite du code dirige par la syntaxe :
+  n°  instruction                 t1 t2 t3 t4 t5 t6 t7 t8 t9 vivants apres la ligne
+   1  ld  temp_1, [n]             ┬                          1  {temp_1}
+   2  ld  temp_2, [n]             │  ┬                       2  {temp_1, temp_2}
+   3  li  temp_3, 1               │  │  ┬                    3  {temp_1, temp_2, temp_3}   <-- max
+   4  add temp_4, temp_2, temp_3  │  ┴  ┴  ┬                 2  {temp_1, temp_4}
+   5  mul temp_5, temp_1, temp_4  ┴        ┴  ┬              1  {temp_5}
+   6  li  temp_6, 2                           │  ┬           2  {temp_5, temp_6}
+   7  ld  temp_7, [n]                         │  │  ┬        3  {temp_5, temp_6, temp_7}   <-- max
+   8  mul temp_8, temp_6, temp_7              │  ┴  ┴  ┬     2  {temp_5, temp_8}
+   9  add temp_9, temp_5, temp_8              ┴        ┴  ┬  1  {temp_9}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+       temp_1 : 1 -> 5
+       temp_2 : 2 -> 4
+       temp_3 : 3 -> 4
+       temp_4 : 4 -> 5
+       temp_5 : 5 -> 9
+       temp_6 : 6 -> 8
+       temp_7 : 7 -> 8
+       temp_8 : 8 -> 9
+       temp_9 : 9 -> 10
+  Maximum de valeurs vivantes simultanement : 3, aux points p_3 (entre ligne 3 et ligne 4), p_7 (entre ligne 7 et ligne 8)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 3 2 1 2 3 2 -> max 3
+
+  Graphe de dependances (aretes noeud fils -> noeud pere) identique pour les deux codes : True (8 aretes)
+  Instructions deplacees (noeud : ligne dans le code dirige par la syntaxe -> ligne dans SU) :
+     Egdg   ld  temp_2, [n]            ligne 2 -> ligne 1
+     Egdd   li  temp_3, 1              ligne 3 -> ligne 2
+     Egd    add temp_4, temp_2, temp_3 ligne 4 -> ligne 3
+     Egg    ld  temp_1, [n]            ligne 1 -> ligne 4
+
+====================================================================================================
+Exercice 3 : variante DAG (a et b charges une seule fois, pour info)
+====================================================================================================
+  n°  instruction                 t1 t2 t3 t4 t5 t6 t7 vivants apres la ligne
+   1  ld  temp_1, [a]             ┬                    1  {temp_1}
+   2  ld  temp_2, [b]             │  ┬                 2  {temp_1, temp_2}
+   3  add temp_3, temp_1, temp_2  │  │  ┬              3  {temp_1, temp_2, temp_3}   <-- max
+   4  sub temp_4, temp_1, temp_2  ┴  ┴  │  ┬           2  {temp_3, temp_4}
+   5  mul temp_5, temp_3, temp_4        ┴  ┴  ┬        1  {temp_5}
+   6  li  temp_6, 1                           │  ┬     2  {temp_5, temp_6}
+   7  add temp_7, temp_5, temp_6              ┴  ┴  ┬  1  {temp_7}
+  Intervalles (ligne de definition -> ligne de derniere lecture ; n+1 = vivant en sortie) :
+       temp_1 : 1 -> 4
+       temp_2 : 2 -> 4
+       temp_3 : 3 -> 5
+       temp_4 : 4 -> 5
+       temp_5 : 5 -> 7
+       temp_6 : 6 -> 7
+       temp_7 : 7 -> 8
+  Maximum de valeurs vivantes simultanement : 3, aux points p_3 (entre ligne 3 et ligne 4)
+  Convention de la diapo 31/32 (vivants a l'ENTREE de chaque instruction) : 0 1 2 3 2 1 2 -> max 3
+  valeur : 17 (attendu 17)
+  Tous les ordres valides du DAG : 24 ordonnancements valides ; max-vivants minimal = 3 (atteint par 8 ordres), pire = 4
+
+====================================================================================================
+Exercice 4 : le sous-arbre gauche n*(n+1) seul (gain local de Sethi-Ullman)
+====================================================================================================
+  Sethi-Ullman          : ld  temp_1, [n] ; li  temp_2, 1 ; add temp_3, temp_1, temp_2 ; ld  temp_4, [n] ; mul temp_5, temp_4, temp_3  -> max vivants = 2
+  dirige par la syntaxe : ld  temp_1, [n] ; ld  temp_2, [n] ; li  temp_3, 1 ; add temp_4, temp_2, temp_3 ; mul temp_5, temp_1, temp_4  -> max vivants = 3
+  rho(n*(n+1)) = 2
+
+====================================================================================================
+Exercice 4 : variante commutee (pour info) : si on avait ecrit (n+1)*n
+====================================================================================================
+  rho = 3 ; code SU identique au code dirige par la syntaxe : True
+
+
+TD5 Compilation - section 5.3 - verification des exercices 5 et 6
+Convention : v vivante en p_i (juste apres la ligne i) ssi def(v) <= i < derniere lecture(v).
+
+====================================================================================================
+Exercice 5 : intervalles de vie et interferences
+====================================================================================================
+  n°  instruction    a  b  c  d  e  f  g  h   vivants apres la ligne
+   1  a = load m0    ┬                        1  {a}
+   2  b = load m1    │  ┬                     2  {a, b}
+   3  c = a + b      │  │  ┬                  3  {a, b, c}   <-- max
+   4  d = 4 * c      │  │  ┴  ┬               3  {a, b, d}   <-- max
+   5  e = b + 1      │  ┴     │  ┬            3  {a, d, e}   <-- max
+   6  f = e + a      ┴        │  │  ┬         3  {d, e, f}   <-- max
+   7  g = d / e               ┴  ┴  │  ┬      2  {f, g}
+   8  h = f - g                     ┴  ┴  ┬   1  {h}
+   9  ret h                               ┴   0  {}
+  Intervalles (definition -> derniere lecture) : a : 1->6 ; b : 2->5 ; c : 3->4 ; d : 4->7 ; e : 5->7 ; f : 6->8 ; g : 7->8 ; h : 8->9
+  Max vivants simultanes : 3 aux points p_3, p_4, p_5, p_6
+  Vivants a l'entree de chaque instruction (convention diapo 31/32) : [0, 1, 2, 3, 3, 3, 3, 2, 1]
+  Interferences (10 aretes) : a-b a-c a-d a-e b-c b-d d-e d-f e-f f-g
+  Paires sans interference (18) : a-f a-g a-h b-e b-f b-g b-h c-d c-e c-f c-g c-h d-g d-h e-g e-h f-h g-h
+  Tous les ordres valides du bloc : 22 ; max-vivants minimal = 3 (atteint par 19 ordres) -> meme en reordonnant, 2 registres ne suffisent pas sans spill
+
+====================================================================================================
+Exercice 5 q1 : linear scan (bin packing glouton) avec 6 registres R0..R5
+====================================================================================================
+  ligne 1: a (1, 6) -> R0
+  ligne 2: b (2, 5) -> R1
+  ligne 3: c (3, 4) -> R2
+  ligne 4: d (4, 7) -> R2   (liberes avant : c)
+  ligne 5: e (5, 7) -> R1   (liberes avant : b)
+  ligne 6: f (6, 8) -> R0   (liberes avant : a)
+  ligne 7: g (7, 8) -> R1   (liberes avant : d, e)
+  ligne 8: h (8, 9) -> R0   (liberes avant : f, g)
+  Allocation : a->R0, b->R1, c->R2, d->R2, e->R1, f->R0, g->R1, h->R0
+  Registres utilises : ['R0', 'R1', 'R2'] (3) ; spills : []
+  Verification : aucun registre ne porte deux intervalles qui se chevauchent -> OK (assert)
+  ligne  instruction    R0   R1   R2   R3   R4   R5   
+     1   a = load m0    a┬   .    .    .    .    .    
+     2   b = load m1    a│   b┬   .    .    .    .    
+     3   c = a + b      a│   b│   c┬   .    .    .    
+     4   d = 4 * c      a│   b│   c>d  .    .    .    
+     5   e = b + 1      a│   b>e  d│   .    .    .    
+     6   f = e + a      a>f  e│   d│   .    .    .    
+     7   g = d / e      f│   e>g  d┴   .    .    .    
+     8   h = f - g      f>h  g┴   .    .    .    .    
+     9   ret h          h┴   .    .    .    .    .    
+  (x┬ : x defini a cette ligne ; x│ : x vivant ; x┴ : derniere lecture de x ; x>y : x lu pour la derniere fois et y ecrit dans le meme registre)
+  bac R0 : a [1,6] puis f [6,8] puis h [8,9]
+  bac R1 : b [2,5] puis e [5,7] puis g [7,8]
+  bac R2 : c [3,4] puis d [4,7]
+  Simulation numerique (m0=6, m1=2) avec les registres alloues : h = -1 -> OK
+  Linear scan avec 3 registres : spills = aucun
+  Linear scan avec 2 registres : spills = ['a', 'f'] ; ligne 3: c (3, 4) : plus de registre libre -> spill de a
+
+====================================================================================================
+Exercice 6 : 2 registres - recherche exhaustive du nombre minimal de load/store inseres
+====================================================================================================
+  [min total puis min stores] cout minimal = 5 (3 load(s) + 2 store(s))
+     a = load m0 -> R0 | b = load m1 -> R1 | c = a + b -> R0 | d = 4 * c -> R0 | e = b + 1 -> R1 | store d | a = load -> R0 | f = e + a -> R0 | store f | d = load -> R0 | g = d / e -> R0 | f = load -> R1 | h = f - g -> R0 | ret h
+  [min total puis min loads] cout minimal = 5 (3 load(s) + 2 store(s))
+     a = load m0 -> R0 | b = load m1 -> R1 | c = a + b -> R0 | d = 4 * c -> R0 | e = b + 1 -> R1 | store d | a = load -> R0 | f = e + a -> R0 | store f | d = load -> R0 | g = d / e -> R0 | f = load -> R1 | h = f - g -> R0 | ret h
+  Nombre de solutions optimales (suites d'operations, choix de registre compris) : 40
+  Repartitions (loads, stores) des solutions optimales : [(3, 2)]
+  Solutions de cout 4 : 0 -> le minimum 5 est PROUVE (dans le modele)
+  Vivants a l'entree de la ligne 6 (f = e + a) : ['a', 'd', 'e'] ; operandes : ['e', 'a']
+  Vivants a l'entree de la ligne 7 (g = d / e) : ['d', 'e', 'f'] ; operandes : ['d', 'e']
+  Vivants juste apres la ligne 3 : ['a', 'b', 'c']
+
+====================================================================================================
+Exercice 6 : allocateur glouton (prochaine lecture la plus lointaine, store seulement si besoin)
+====================================================================================================
+     a = load m0     R0 <- m0
+     b = load m1     R1 <- m1
+     c = a + b       R0 <- R0 + R1
+     d = 4 * c       R0 <- 4 * R0
+     e = b + 1       R1 <- R1 + 1
+     store d m2      m2 <- R0   (+1 store)
+     a = load m0     R0 <- m0   (+1 load)
+     f = e + a       R0 <- R1 + R0
+     store f m3      m3 <- R0   (+1 store)
+     d = load m2     R0 <- m2   (+1 load)
+     g = d / e       R0 <- R0 / R1
+     f = load m3     R1 <- m3   (+1 load)
+     h = f - g       R0 <- R1 - R0
+     ret h           ret R0
+  Simulation symbolique + numerique : OK ; 3 load(s) + 2 store(s) inseres = 5
+
+====================================================================================================
+Exercice 6 : solution retenue pour le corrige (verifiee pas a pas)
+====================================================================================================
+     a = load m0     R0 <- m0
+     b = load m1     R1 <- m1
+     c = a + b       R0 <- R0 + R1
+     d = 4 * c       R0 <- 4 * R0
+     e = b + 1       R1 <- R1 + 1
+     store d m2      m2 <- R0   (+1 store)
+     a = load m0     R0 <- m0   (+1 load)
+     f = e + a       R0 <- R1 + R0
+     store f m3      m3 <- R0   (+1 store)
+     d = load m2     R0 <- m2   (+1 load)
+     g = d / e       R0 <- R0 / R1
+     f = load m3     R1 <- m3   (+1 load)
+     h = f - g       R0 <- R1 - R0
+     ret h           ret R0
+  m0=6, m1=2 : h calcule = -1, attendu = -1 -> OK
+  m0=10, m1=3 : h calcule = 1, attendu = 1 -> OK
+  m0=-7, m1=5 : h calcule = 1, attendu = 1 -> OK
+  Inseres : 3 load(s) + 2 store(s) = 5 ; acces memoire au total (avec les 2 load d'origine) : 7
+  pas instruction        R0  R1  | m0 m1 m2 m3 m4 m5 m6
+    1 a = load m0       a   .   | a  b  .  .  .  .  . 
+    2 b = load m1       a   b   | a  b  .  .  .  .  . 
+    3 c = a + b         c   b   | a  b  .  .  .  .  . 
+    4 d = 4 * c         d   b   | a  b  .  .  .  .  . 
+    5 e = b + 1         d   e   | a  b  .  .  .  .  . 
+    6 store d m2        d   e   | a  b  d  .  .  .  . 
+    7 a = load m0       a   e   | a  b  d  .  .  .  . 
+    8 f = e + a         f   e   | a  b  d  .  .  .  . 
+    9 store f m3        f   e   | a  b  d  f  .  .  . 
+   10 d = load m2       d   e   | a  b  d  f  .  .  . 
+   11 g = d / e         g   e   | a  b  d  f  .  .  . 
+   12 f = load m3       g   f   | a  b  d  f  .  .  . 
+   13 h = f - g         h   f   | a  b  d  f  .  .  . 
+   14 ret h             h   f   | a  b  d  f  .  .  . 
+  Barres (comme les colonnes de la figure de l'enonce) :
+  pas  instruction       R0    R1    m0    m1    m2    m3    
+    0  etat initial      .     .     a┬    b┬    .     .     
+    1  a = load m0       a┬    .     a│    b│    .     .     
+    2  b = load m1       a│    b┬    a│    b┴    .     .     
+    3  c = a + b         a>c   b│    a│    .     .     .     
+    4  d = 4 * c         c>d   b│    a│    .     .     .     
+    5  e = b + 1         d│    b>e   a│    .     .     .     
+    6  store d m2        d┴    e│    a│    .     d┬    .     
+    7  a = load m0       a┬    e│    a┴    .     d│    .     
+    8  f = e + a         a>f   e│    .     .     d│    .     
+    9  store f m3        f┴    e│    .     .     d│    f┬    
+   10  d = load m2       d┬    e│    .     .     d┴    f│    
+   11  g = d / e         d>g   e┴    .     .     .     f│    
+   12  f = load m3       g│    f┬    .     .     .     f┴    
+   13  h = f - g         g>h   f┴    .     .     .     .     
+   14  ret h             h┴    .     .     .     .     .     
+  R0 : a [1,3] ; c [3,4] ; d [4,6] ; a [7,8] ; f [8,9] ; d [10,11] ; g [11,13] ; h [13,14]
+  R1 : b [2,5] ; e [5,11] ; f [12,13]
+  m0 : a [0,7]
+  m1 : b [0,2]
+  m2 : d [6,10]
+  m3 : f [9,12]
+  (barre = de l'ecriture dans l'emplacement a la derniere lecture DANS cet emplacement ; x>y : x lu une derniere fois et y ecrit au meme pas ; m4, m5, m6 inutilises)
+
+====================================================================================================
+Exercice 6 : comparaison avec 'tout en memoire' (a..g dans m0..m6, h rendu directement)
+====================================================================================================
+  10 load(s) + 5 store(s) = 15 acces memoire (contre 7 pour la solution retenue)
+     a = load m0     R0 <- m0   (+1 load)
+     b = load m1     R1 <- m1   (+1 load)
+     c = a + b       R0 <- R0 + R1
+     store c m2      m2 <- R0   (+1 store)
+     c = load m2     R0 <- m2   (+1 load)
+     d = 4 * c       R0 <- 4 * R0
+     store d m3      m3 <- R0   (+1 store)
+     b = load m1     R0 <- m1   (+1 load)
+     e = b + 1       R0 <- R0 + 1
+     store e m4      m4 <- R0   (+1 store)
+     e = load m4     R0 <- m4   (+1 load)
+     a = load m0     R1 <- m0   (+1 load)
+     f = e + a       R0 <- R0 + R1
+     store f m5      m5 <- R0   (+1 store)
+     d = load m3     R0 <- m3   (+1 load)
+     e = load m4     R1 <- m4   (+1 load)
+     g = d / e       R0 <- R0 / R1
+     store g m6      m6 <- R0   (+1 store)
+     f = load m5     R0 <- m5   (+1 load)
+     g = load m6     R1 <- m6   (+1 load)
+     h = f - g       R0 <- R0 - R1
+     ret h           ret R0

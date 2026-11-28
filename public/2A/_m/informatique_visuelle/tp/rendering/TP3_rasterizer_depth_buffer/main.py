@@ -17,15 +17,15 @@ nearPlane = 0.1
 farPlane = 10.0
 fov = 1.91986
 aspectRatio = width/height
-proj = Projection(nearPlane ,farPlane,fov, aspectRatio) 
+proj = Projection(nearPlane ,farPlane,fov, aspectRatio)
 
 vertices = np.array([
   [0.0,0.0,0.0], #0
   [1.0,0.0,0.0], #1
-  [0.0,1.0,0.0], #2 
-  [1.0,1.0,0.0], #3 
-  [0.0,0.0,1.0], #4 
-  [1.0,0.0,1.0], #5 
+  [0.0,1.0,0.0], #2
+  [1.0,1.0,0.0], #3
+  [0.0,0.0,1.0], #4
+  [1.0,0.0,1.0], #5
   [0.0,1.0,1.0], #6
   [1.0,1.0,1.0], #7
 ])
@@ -50,8 +50,18 @@ data = dict([
   ('projMatrix',proj.getMatrix())
 ])
 
-pipeline.draw(vertices, triangles, data)
+# comparaison des deux rasterizers : plusieurs passages, temps moyen
+import time
+for nom, scanLine in [("boite englobante", False), ("scan line", True)] :
+  temps = []
+  for k in range(5) :
+    pipeline = GraphicPipeline(width, height)   # depth buffer remis à zéro
+    debut = time.time()
+    pipeline.draw(vertices, triangles, data, scanLine)
+    temps.append(time.time() - debut)
+  print(nom, ":", round(sum(temps) / len(temps), 3), "s en moyenne")
 
 import matplotlib.pyplot as plt
-imgplot = plt.imshow(pipeline.depthBuffer, cmap='gray')
+#imgplot = plt.imshow(pipeline.depthBuffer, cmap='gray')
+imgplot = plt.imshow(1/pipeline.depthBuffer, cmap='gray')
 plt.show()
